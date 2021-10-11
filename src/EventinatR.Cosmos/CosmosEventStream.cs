@@ -67,7 +67,7 @@ namespace EventinatR.CosmosDB
             try
             {
                 var snapshot = await _container.ReadItemAsync<SnapshotDocument<T>>(id, _partitionKey, cancellationToken: cancellationToken).ConfigureAwait(false);
-                return new CosmosEventStreamSnapshot<T>(this, snapshot.Resource.Version, snapshot.Resource.State);
+                return new CosmosEventStreamSnapshot<T>(this, new EventStreamVersion(snapshot.Resource.Version), snapshot.Resource.State);
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
@@ -75,10 +75,10 @@ namespace EventinatR.CosmosDB
             }
         }
 
-        public override async Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, long version, CancellationToken cancellationToken = default)
+        public override async Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken = default)
         {
             var id = CosmosEventStreamSnapshot<T>.CreateSnapshotId(Id);
-            var resource = new SnapshotDocument<T>(Id!, id, version, typeof(T).FullName!, state);
+            var resource = new SnapshotDocument<T>(Id!, id, version.Value, typeof(T).FullName!, state);
             var options = new ItemRequestOptions
             {
                 IfMatchEtag = "*"

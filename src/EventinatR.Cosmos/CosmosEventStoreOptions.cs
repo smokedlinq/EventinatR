@@ -8,6 +8,9 @@ namespace EventinatR.CosmosDB
 {
     public class CosmosEventStoreOptions : CosmosClientOptions
     {
+        public const string DefaultDatabaseId = "event-store";
+        public const string DefaultContainerId = "events";
+
         public CosmosEventStoreOptions()
             => SerializerOptions = new CosmosSerializationOptions
             {
@@ -18,9 +21,9 @@ namespace EventinatR.CosmosDB
         public string? AccountEndpoint { get; set; }
         public string? AuthKeyOrTokenResource { get; set; }
         public string? ConnectionString { get; set; }
-        public string DatabaseId { get; set; } = "event-store";
+        public string DatabaseId { get; set; } = DefaultDatabaseId;
         public int? Throughput { get; set; }
-        public CosmosEventStoreContainerOptions Container { get; } = new("events");
+        public CosmosEventStoreContainerOptions Container { get; } = new(DefaultContainerId);
 
         public CosmosClient CreateCosmosClient(TokenCredential? credential = null)
         {

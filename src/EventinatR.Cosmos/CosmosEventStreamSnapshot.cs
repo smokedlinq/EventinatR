@@ -10,12 +10,12 @@ namespace EventinatR.CosmosDB
     {
         private readonly CosmosEventStream _stream;
 
-        public CosmosEventStreamSnapshot(CosmosEventStream stream, long version = 0, T? state = default)
+        public CosmosEventStreamSnapshot(CosmosEventStream stream, EventStreamVersion? version = null, T? state = default)
             : base(version, state)
             => _stream = stream ?? throw new ArgumentNullException(nameof(stream));
 
         public override IAsyncEnumerable<Event> ReadAsync(CancellationToken cancellationToken = default)
-            => _stream.ReadFromVersionAsync(Version, cancellationToken);
+            => _stream.ReadFromVersionAsync(Version.Value, cancellationToken);
 
         public static string CreateSnapshotId(string streamId)
             => $"{streamId}:{GetSnapshotNameFromType()}";

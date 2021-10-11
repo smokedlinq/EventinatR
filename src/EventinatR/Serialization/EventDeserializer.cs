@@ -22,6 +22,8 @@ namespace EventinatR.Serialization
         {
         }
 
+        internal IEnumerable<IEventDataDeserializer> Deserializers => _deserializers.AsEnumerable();
+
         public bool TryDeserialize<T>(EventinatR.Event @event, [MaybeNullWhen(false)] out T result)
         {
             result = default;

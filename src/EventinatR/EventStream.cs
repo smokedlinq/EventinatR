@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,6 +24,6 @@ namespace EventinatR
 
         public abstract Task<EventStreamSnapshot<T>> ReadSnapshotAsync<T>(CancellationToken cancellationToken = default);
 
-        public abstract Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, long version, CancellationToken cancellationToken = default);
+        public abstract Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken = default);
     }
 }

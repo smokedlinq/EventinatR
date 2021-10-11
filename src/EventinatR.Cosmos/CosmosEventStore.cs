@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Options;
 
 namespace EventinatR.CosmosDB
 {
@@ -12,6 +13,11 @@ namespace EventinatR.CosmosDB
         private readonly AsyncLazy<Container> _container;
 
         public CosmosEventStoreOptions Options { get; }
+
+        public CosmosEventStore(TokenCredential? credential, IOptions<CosmosEventStoreOptions> options)
+            : this(credential, options.Value)
+        {
+        }
 
         public CosmosEventStore(TokenCredential? credential, CosmosEventStoreOptions options)
         {

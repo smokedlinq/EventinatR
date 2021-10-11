@@ -31,7 +31,7 @@ namespace EventinatR.InMemory
             return Task.FromResult(snapshot);
         }
 
-        public override Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, long version, CancellationToken cancellationToken = default)
+        public override Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken = default)
         {
             var type = typeof(T);
             var snapshot = new InMemoryEventStreamSnapshot<T>(this, version, state);
