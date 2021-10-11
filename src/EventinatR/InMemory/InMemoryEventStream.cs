@@ -41,7 +41,7 @@ namespace EventinatR.InMemory
 
         public override async Task<EventStreamVersion> AppendAsync<T>(IEnumerable<T> collection, CancellationToken cancellationToken = default)
         {
-            // Lock to prevent race condition on event version during append
+            // Lock to prevent race condition on event version
             await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             try
