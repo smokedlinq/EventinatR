@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 
 namespace EventinatR.Cosmos.Documents
 {
-    public record ChangeFeedDocument(string StreamId, string Id, long Version, string Type, DateTimeOffset Timestamp, string DataType, JToken Data, string StateType, JToken State) : Document(StreamId, Id, Version, Type)
+    internal record ChangeFeedDocument(string StreamId, string Id, long Version, string Type, DateTimeOffset Timestamp, string DataType, JToken Data, string StateType, JToken State) : Document(StreamId, Id, Version, Type)
     {
         public bool IsEvent
             => string.Equals(Type, DocumentTypes.Event, StringComparison.OrdinalIgnoreCase);

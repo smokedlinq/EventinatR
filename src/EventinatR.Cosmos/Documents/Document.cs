@@ -1,4 +1,4 @@
-﻿namespace EventinatR.Cosmos.Documents
+namespace EventinatR.Cosmos.Documents
 {
-    public abstract record Document(string StreamId, string Id, long Version, string Type);
+    internal abstract record Document(string StreamId, string Id, long Version, string Type);
 }
