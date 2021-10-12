@@ -2,7 +2,7 @@ using System;
 using System.Runtime.Serialization;
 using Microsoft.Azure.Cosmos;
 
-namespace EventinatR.CosmosDB
+namespace EventinatR.Cosmos
 {
     public class CosmosEventStreamAppendException : CosmosEventStoreException
     {

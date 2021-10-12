@@ -1,4 +1,4 @@
-namespace EventinatR.CosmosDB.Documents
+namespace EventinatR.Cosmos.Documents
 {
     internal static class DocumentTypes
     {

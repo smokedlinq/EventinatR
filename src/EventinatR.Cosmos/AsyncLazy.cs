@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EventinatR.CosmosDB
+namespace EventinatR.Cosmos
 {
     internal class AsyncLazy<T> : Lazy<Task<T>>
     {

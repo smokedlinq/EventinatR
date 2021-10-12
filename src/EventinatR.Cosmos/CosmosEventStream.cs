@@ -4,10 +4,10 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using EventinatR.CosmosDB.Documents;
+using EventinatR.Cosmos.Documents;
 using Microsoft.Azure.Cosmos;
 
-namespace EventinatR.CosmosDB
+namespace EventinatR.Cosmos
 {
     internal class CosmosEventStream : EventStream
     {

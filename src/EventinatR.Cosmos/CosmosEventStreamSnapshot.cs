@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-namespace EventinatR.CosmosDB
+namespace EventinatR.Cosmos
 {
     internal class CosmosEventStreamSnapshot<T> : EventStreamSnapshot<T>
     {

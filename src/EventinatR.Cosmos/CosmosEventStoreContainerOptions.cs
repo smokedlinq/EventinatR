@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EventinatR.CosmosDB
+namespace EventinatR.Cosmos
 {
     public class CosmosEventStoreContainerOptions
     {

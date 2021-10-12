@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json.Linq;
 
-namespace EventinatR.CosmosDB.Documents
+namespace EventinatR.Cosmos.Documents
 {
     public record ChangeFeedDocument(string StreamId, string Id, long Version, string Type, DateTimeOffset Timestamp, string DataType, JToken Data, string StateType, JToken State) : Document(StreamId, Id, Version, Type)
     {

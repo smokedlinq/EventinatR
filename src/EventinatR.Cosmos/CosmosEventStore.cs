@@ -5,7 +5,7 @@ using Azure.Core;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Options;
 
-namespace EventinatR.CosmosDB
+namespace EventinatR.Cosmos
 {
     public class CosmosEventStore : EventStore, IAsyncDisposable
     {

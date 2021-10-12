@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.Azure.Cosmos;
 
-namespace EventinatR.CosmosDB
+namespace EventinatR.Cosmos
 {
     public class CosmosEventStoreOptions : CosmosClientOptions
     {

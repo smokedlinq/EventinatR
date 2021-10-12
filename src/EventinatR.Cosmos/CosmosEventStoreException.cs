@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace EventinatR.CosmosDB
+namespace EventinatR.Cosmos
 {
     public class CosmosEventStoreException : Exception
     {
