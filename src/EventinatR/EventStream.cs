@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace EventinatR
 {
-    public abstract class EventStream
+    public abstract class EventStream : IEventStreamReader
     {
         protected EventStream()
             : this(string.Empty)

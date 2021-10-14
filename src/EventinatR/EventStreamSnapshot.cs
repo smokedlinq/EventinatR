@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace EventinatR
 {
-    public abstract class EventStreamSnapshot<T>
+    public abstract class EventStreamSnapshot<T> : IEventStreamReader
     {
         public EventStreamSnapshot(EventStreamVersion? version = null, T? state = default)
         {
