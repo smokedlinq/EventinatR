@@ -11,8 +11,8 @@ namespace EventinatR.Cosmos
         private readonly CosmosEventStream _stream;
 
         public CosmosEventStreamSnapshot(CosmosEventStream stream, EventStreamVersion? version = null, T? state = default)
-            : base(version, state)
-            => _stream = stream ?? throw new ArgumentNullException(nameof(stream));
+            : base(stream?.Id ?? throw new ArgumentNullException(nameof(stream)), version, state)
+            => _stream = stream;
 
         public override IAsyncEnumerable<Event> ReadAsync(CancellationToken cancellationToken = default)
             => _stream.ReadFromVersionAsync(Version.Value, cancellationToken);

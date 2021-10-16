@@ -14,11 +14,11 @@ namespace EventinatR.Cosmos
         private readonly Container _container;
         private readonly PartitionKey _partitionKey;
 
-        public CosmosEventStream(Container container, string id)
-            : base(id.ToLowerInvariant())
+        public CosmosEventStream(Container container, EventStreamId id)
+            : base(id)
         {
             _container = container ?? throw new ArgumentNullException(nameof(container));
-            _partitionKey = new PartitionKey(Id!);
+            _partitionKey = new PartitionKey(Id.Value);
         }
 
         public virtual async IAsyncEnumerable<Event> ReadFromVersionAsync(long version, [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -40,7 +40,7 @@ namespace EventinatR.Cosmos
 
                 foreach (var doc in page)
                 {
-                    yield return new Event(doc.Version, doc.Timestamp, doc.DataType, new BinaryData(doc.Data.ToString()));
+                    yield return new Event(Id, doc.Version, doc.Timestamp, doc.DataType, new BinaryData(doc.Data.ToString()));
                 }
             }
         }
@@ -49,7 +49,7 @@ namespace EventinatR.Cosmos
         {
             try
             {
-                return await _container.ReadItemAsync<StreamDocument>(Id, _partitionKey, cancellationToken: cancellationToken);
+                return await _container.ReadItemAsync<StreamDocument>(Id.Value, _partitionKey, cancellationToken: cancellationToken);
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
@@ -62,7 +62,7 @@ namespace EventinatR.Cosmos
 
         public override async Task<EventStreamSnapshot<T>> ReadSnapshotAsync<T>(CancellationToken cancellationToken = default)
         {
-            var id = CosmosEventStreamSnapshot<T>.CreateSnapshotId(Id);
+            var id = CosmosEventStreamSnapshot<T>.CreateSnapshotId(Id.Value);
 
             try
             {
@@ -77,8 +77,8 @@ namespace EventinatR.Cosmos
 
         public override async Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken = default)
         {
-            var id = CosmosEventStreamSnapshot<T>.CreateSnapshotId(Id);
-            var resource = new SnapshotDocument<T>(Id!, id, version.Value, typeof(T).FullName!, state);
+            var id = CosmosEventStreamSnapshot<T>.CreateSnapshotId(Id.Value);
+            var resource = new SnapshotDocument<T>(Id.Value, id, version.Value, typeof(T).FullName!, state);
             var options = new ItemRequestOptions
             {
                 IfMatchEtag = "*"
@@ -100,11 +100,11 @@ namespace EventinatR.Cosmos
             {
                 version++;
                 var id = $"{Id}:{version}";
-                var eventResource = new ObjectEventDocument(Id!, id, version, DateTimeOffset.Now, data.GetType().FullName!, data);
+                var eventResource = new ObjectEventDocument(Id.Value, id, version, DateTimeOffset.Now, data.GetType().FullName!, data);
                 batch = batch.CreateItem(eventResource);
             }
 
-            var streamResource = new StreamDocument(Id!, Id!, version);
+            var streamResource = new StreamDocument(Id.Value, Id.Value, version);
 
             if (stream?.Resource is null)
             {

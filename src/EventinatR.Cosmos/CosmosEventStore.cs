@@ -34,7 +34,7 @@ namespace EventinatR.Cosmos
         public async Task<Container> GetContainerAsync()
             => await _container.ConfigureAwait(false);
 
-        public override async Task<EventStream> GetStreamAsync(string id, CancellationToken cancellationToken = default)
+        public override async Task<EventStream> GetStreamAsync(EventStreamId id, CancellationToken cancellationToken = default)
         {
             var container = await _container.ConfigureAwait(false);
             return new CosmosEventStream(container, id);

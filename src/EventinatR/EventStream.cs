@@ -8,14 +8,14 @@ namespace EventinatR
     public abstract class EventStream : IEventStreamReader
     {
         protected EventStream()
-            : this(string.Empty)
+            : this(EventStreamId.None)
         {
         }
 
-        public EventStream(string id)
+        public EventStream(EventStreamId id)
             => Id = id ?? throw new ArgumentNullException(nameof(id));
 
-        public string Id { get; }
+        public EventStreamId Id { get; }
 
         public abstract Task<EventStreamVersion> AppendAsync<T>(IEnumerable<T> events, CancellationToken cancellationToken = default)
             where T : class;

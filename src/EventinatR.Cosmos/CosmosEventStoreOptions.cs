@@ -12,11 +12,14 @@ namespace EventinatR.Cosmos
         public const string DefaultContainerId = "events";
 
         public CosmosEventStoreOptions()
-            => SerializerOptions = new CosmosSerializationOptions
+        {
+            EnableContentResponseOnWrite = false;
+            SerializerOptions = new CosmosSerializationOptions
             {
                 IgnoreNullValues = true,
                 PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
             };
+        }
 
         public string? AccountEndpoint { get; set; }
         public string? AuthKeyOrTokenResource { get; set; }

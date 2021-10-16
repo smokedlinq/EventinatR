@@ -7,9 +7,9 @@ namespace EventinatR.InMemory
 {
     public class InMemoryEventStore : EventStore
     {
-        private readonly ConcurrentDictionary<string, EventStream> _streams = new();
+        private readonly ConcurrentDictionary<EventStreamId, EventStream> _streams = new();
 
-        public override Task<EventStream> GetStreamAsync(string id, CancellationToken cancellationToken = default)
+        public override Task<EventStream> GetStreamAsync(EventStreamId id, CancellationToken cancellationToken = default)
         {
             EventStream? stream;
 

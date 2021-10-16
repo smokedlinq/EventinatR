@@ -13,7 +13,7 @@ namespace EventinatR.InMemory
         private readonly ConcurrentDictionary<Type, object> _snapshots = new();
         private readonly SemaphoreSlim _lock = new(1, 1);
 
-        public InMemoryEventStream(string id)
+        public InMemoryEventStream(EventStreamId id)
             : base(id)
         {
         }
@@ -48,7 +48,7 @@ namespace EventinatR.InMemory
             {
                 foreach (var data in collection)
                 {
-                    var @event = new Event(_events.Count, DateTimeOffset.Now, data.GetType().FullName!, new BinaryData(data));
+                    var @event = new Event(Id, _events.Count, DateTimeOffset.Now, data.GetType().FullName!, new BinaryData(data));
                     _events.Add(@event);
                 }
 

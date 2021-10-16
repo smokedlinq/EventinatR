@@ -4,9 +4,9 @@ using System.Text.Json;
 
 namespace EventinatR.Serialization
 {
-    public static class DefaultEventDataDeserializer
+    public static class DefaultEventDataConverter
     {
-        public static IEventDeserializerBuilder UseDefault<T>(this IEventDeserializerBuilder builder, JsonSerializerOptions? serializerOptions = null)
+        public static IEventDataDeserializerBuilder UseDefault<T>(this IEventDataDeserializerBuilder builder, JsonSerializerOptions? serializerOptions = null)
         {
             var type = typeof(T);
             var options = Expression.Constant(serializerOptions ?? new JsonSerializerOptions
@@ -14,30 +14,30 @@ namespace EventinatR.Serialization
                 PropertyNameCaseInsensitive = true
             });
 
-            var converterType = typeof(EventTypeDeserializer<>).MakeGenericType(type);
+            var converterType = typeof(EventDataConverter<>).MakeGenericType(type);
             var ctor = converterType.GetConstructor(new[] { typeof(JsonSerializerOptions) });
             var call = Expression.New(ctor!, options);
-            var cast = Expression.Convert(call, typeof(IEventDataDeserializer));
-            var deserializer = Expression.Lambda<Func<IEventDataDeserializer>>(cast).Compile().Invoke();
+            var cast = Expression.Convert(call, typeof(IEventDataConverter));
+            var deserializer = Expression.Lambda<Func<IEventDataConverter>>(cast).Compile().Invoke();
 
             return builder.Use(deserializer);
         }
 
-        private class EventTypeDeserializer<T> : IEventDataDeserializer
+        private class EventDataConverter<T> : IEventDataConverter
         {
             private static readonly string TypeName = typeof(T).FullName ?? typeof(T).Name;
             private readonly JsonSerializerOptions _serializerOptions;
 
-            public EventTypeDeserializer(JsonSerializerOptions? serializerOptions = null)
+            public EventDataConverter(JsonSerializerOptions? serializerOptions = null)
                 => _serializerOptions = serializerOptions ?? new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 };
 
-            public bool CanDeserialize(Event @event)
+            public bool CanConverter(Event @event)
                 => string.Equals(@event.Type, TypeName, StringComparison.OrdinalIgnoreCase);
 
-            object? IEventDataDeserializer.Deserialize(BinaryData data)
+            object? IEventDataConverter.Convert(BinaryData data)
                 => Deserialize(data);
 
             public virtual T? Deserialize(BinaryData data)
