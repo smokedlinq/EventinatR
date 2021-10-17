@@ -7,51 +7,51 @@ using System.Text.Json;
 
 namespace EventinatR.Serialization
 {
-    public class EventDataDeserializer
+    public class EventConverter
     {
         private readonly List<IEventDataConverter> _converters = new();
 
-        public EventDataDeserializer(Action<IEventDataDeserializerBuilder> configure)
+        public EventConverter(Action<IEventConverterBuilder> configure)
         {
-            var builder = new EventDeserializerBuilder(_converters);
+            var builder = new EventConverterBuilder(_converters);
             configure(builder);
             _converters.Reverse();
         }
 
-        protected EventDataDeserializer()
+        protected EventConverter()
         {
         }
 
         internal IEnumerable<IEventDataConverter> Converters => _converters.AsEnumerable();
 
-        public virtual bool TryDeserialize<T>(Event @event, [MaybeNullWhen(false)] out T result)
+        public virtual bool TryConvert<T>(Event @event, [MaybeNullWhen(false)] out T result)
         {
             result = default;
 
-            var deserializer = _converters.FirstOrDefault(x => x.CanConverter(@event));
-            var obj = deserializer?.Convert(@event.Data);
+            var converter = _converters.FirstOrDefault(x => x.CanConverter(@event));
+            var obj = converter?.Convert(@event.Data);
 
             if (obj is T value)
             {
                 result = value;
-                return true;
+                return value is not null;
             }
 
             return false;
         }
 
-        private class EventDeserializerBuilder : IEventDataDeserializerBuilder
+        private class EventConverterBuilder : IEventConverterBuilder
         {
             private readonly ICollection<IEventDataConverter> _converters;
 
-            public EventDeserializerBuilder(ICollection<IEventDataConverter> converters)
+            public EventConverterBuilder(ICollection<IEventDataConverter> converters)
                 => _converters = converters ?? throw new ArgumentNullException(nameof(converters));
 
-            public IEventDataDeserializerBuilder Use<T>()
+            public IEventConverterBuilder Use<T>()
                 where T : IEventDataConverter, new()
                 => Use(new T());
 
-            public IEventDataDeserializerBuilder Use<T>(T converter)
+            public IEventConverterBuilder Use<T>(T converter)
                 where T : IEventDataConverter
             {
                 _converters.Add(converter ?? throw new ArgumentNullException(nameof(converter)));

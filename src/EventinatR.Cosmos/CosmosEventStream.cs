@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using EventinatR.Cosmos.Documents;
@@ -13,11 +14,13 @@ namespace EventinatR.Cosmos
     {
         private readonly Container _container;
         private readonly PartitionKey _partitionKey;
+        private readonly JsonSerializerOptions _serializerOptions;
 
-        public CosmosEventStream(Container container, EventStreamId id)
+        public CosmosEventStream(Container container, EventStreamId id, JsonSerializerOptions serializerOptions)
             : base(id)
         {
             _container = container ?? throw new ArgumentNullException(nameof(container));
+            _serializerOptions = serializerOptions ?? throw new ArgumentNullException(nameof(serializerOptions));
             _partitionKey = new PartitionKey(Id.Value);
         }
 
@@ -60,31 +63,47 @@ namespace EventinatR.Cosmos
         public override IAsyncEnumerable<Event> ReadAsync(CancellationToken cancellationToken = default)
             => ReadFromVersionAsync(default, cancellationToken);
 
-        public override async Task<EventStreamSnapshot<T>> ReadSnapshotAsync<T>(CancellationToken cancellationToken = default)
+        protected async Task<ItemResponse<SnapshotDocument>?> ReadSnapshotAsync<T>(string id, CancellationToken cancellationToken = default)
         {
-            var id = CosmosEventStreamSnapshot<T>.CreateSnapshotId(Id.Value);
-
             try
             {
-                var snapshot = await _container.ReadItemAsync<SnapshotDocument<T>>(id, _partitionKey, cancellationToken: cancellationToken).ConfigureAwait(false);
-                return new CosmosEventStreamSnapshot<T>(this, new EventStreamVersion(snapshot.Resource.Version), snapshot.Resource.State);
+                return await _container.ReadItemAsync<SnapshotDocument>(id, _partitionKey, cancellationToken: cancellationToken).ConfigureAwait(false);
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
-                return new CosmosEventStreamSnapshot<T>(this);
+                return null;
             }
+        }
+
+        public override async Task<EventStreamSnapshot<T>> ReadSnapshotAsync<T>(CancellationToken cancellationToken = default)
+        {
+            var id = CosmosEventStreamSnapshot<T>.CreateSnapshotId(Id.Value);
+            var snapshot = await ReadSnapshotAsync<T>(id, cancellationToken).ConfigureAwait(false);
+
+            return snapshot is null
+                ? new CosmosEventStreamSnapshot<T>(this)
+                : new CosmosEventStreamSnapshot<T>(this, new EventStreamVersion(snapshot.Resource.Version), snapshot.Resource.State.ToObjectFromJson<T>(_serializerOptions));
         }
 
         public override async Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken = default)
         {
             var id = CosmosEventStreamSnapshot<T>.CreateSnapshotId(Id.Value);
-            var resource = new SnapshotDocument<T>(Id.Value, id, version.Value, typeof(T).FullName!, state);
-            var options = new ItemRequestOptions
-            {
-                IfMatchEtag = "*"
-            };
+            var snapshot = await ReadSnapshotAsync<T>(id, cancellationToken).ConfigureAwait(false);
+            var resource = new SnapshotDocument(Id.Value, id, version.Value, typeof(T).FullName!, BinaryData.FromObjectAsJson(state, _serializerOptions));
 
-            _ = await _container.UpsertItemAsync(resource, _partitionKey, options, cancellationToken).ConfigureAwait(false);
+            if (snapshot is null)
+            {
+                _ = await _container.CreateItemAsync(resource, _partitionKey, cancellationToken: cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                var options = new ItemRequestOptions
+                {
+                    IfMatchEtag = snapshot.ETag
+                };
+
+                _ = await _container.ReplaceItemAsync(resource, id, _partitionKey, options, cancellationToken).ConfigureAwait(false);
+            }
 
             return new CosmosEventStreamSnapshot<T>(this, version, state);
         }
@@ -96,12 +115,18 @@ namespace EventinatR.Cosmos
             var batch = _container.CreateTransactionalBatch(_partitionKey);
             var version = stream?.Resource?.Version ?? default;
 
-            foreach (var data in collection)
+            foreach (var item in collection)
             {
-                version++;
-                var id = $"{Id}:{version}";
-                var eventResource = new ObjectEventDocument(Id.Value, id, version, DateTimeOffset.Now, data.GetType().FullName!, data);
-                batch = batch.CreateItem(eventResource);
+                if (item is not null)
+                {
+                    version++;
+                    var id = $"{Id.Value}:{version}";
+                    var dataType = item.GetType().FullName ?? item.GetType().Name;
+                    var json = JsonSerializer.SerializeToUtf8Bytes(item, item.GetType(), _serializerOptions);
+                    var data = new BinaryData(json);
+                    var eventResource = new EventDocument(Id.Value, id, version, DateTimeOffset.Now, dataType, data);
+                    batch = batch.CreateItem(eventResource);
+                }
             }
 
             var streamResource = new StreamDocument(Id.Value, Id.Value, version);

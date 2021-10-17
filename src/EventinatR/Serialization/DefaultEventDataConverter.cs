@@ -6,7 +6,7 @@ namespace EventinatR.Serialization
 {
     public static class DefaultEventDataConverter
     {
-        public static IEventDataDeserializerBuilder UseDefault<T>(this IEventDataDeserializerBuilder builder, JsonSerializerOptions? serializerOptions = null)
+        public static IEventConverterBuilder UseDefault<T>(this IEventConverterBuilder builder, JsonSerializerOptions? serializerOptions = null)
         {
             var type = typeof(T);
             var options = Expression.Constant(serializerOptions ?? new JsonSerializerOptions
@@ -18,9 +18,9 @@ namespace EventinatR.Serialization
             var ctor = converterType.GetConstructor(new[] { typeof(JsonSerializerOptions) });
             var call = Expression.New(ctor!, options);
             var cast = Expression.Convert(call, typeof(IEventDataConverter));
-            var deserializer = Expression.Lambda<Func<IEventDataConverter>>(cast).Compile().Invoke();
+            var converter = Expression.Lambda<Func<IEventDataConverter>>(cast).Compile().Invoke();
 
-            return builder.Use(deserializer);
+            return builder.Use(converter);
         }
 
         private class EventDataConverter<T> : IEventDataConverter
@@ -38,9 +38,9 @@ namespace EventinatR.Serialization
                 => string.Equals(@event.Type, TypeName, StringComparison.OrdinalIgnoreCase);
 
             object? IEventDataConverter.Convert(BinaryData data)
-                => Deserialize(data);
+                => Convert(data);
 
-            public virtual T? Deserialize(BinaryData data)
+            public virtual T? Convert(BinaryData data)
                 => data.ToObjectFromJson<T>(_serializerOptions);
         }
     }

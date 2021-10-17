@@ -1,12 +1,18 @@
 using System;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json.Serialization;
+using EventinatR.Serialization;
 
 namespace EventinatR.Cosmos.Documents
 {
-    internal record EventDocument(string StreamId, string Id, long Version, DateTimeOffset Timestamp, string DataType, JToken Data) : Document(StreamId, Id, Version, DocumentTypes.Event)
+    internal record EventDocument(
+        string StreamId,
+        string Id,
+        long Version,
+        DateTimeOffset Timestamp,
+        string DataType,
+        [property: JsonConverter(typeof(BinaryDataConverter))] BinaryData Data) : Document(StreamId, Id, Version, DocumentTypes.Event)
     {
-        public Event AsEvent()
-            => new(new EventStreamId(StreamId), Version, Timestamp, DataType, new BinaryData(Data.ToString(Formatting.None)));
+        public Event ToEvent()
+            => new(new EventStreamId(StreamId), Version, Timestamp, DataType, Data);
     }
 }

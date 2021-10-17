@@ -1,9 +1,19 @@
 using System;
-using Newtonsoft.Json.Linq;
+using System.Text.Json.Serialization;
+using EventinatR.Serialization;
 
 namespace EventinatR.Cosmos.Documents
 {
-    internal record ChangeFeedDocument(string StreamId, string Id, long Version, string Type, DateTimeOffset Timestamp, string DataType, JToken Data, string StateType, JToken State) : Document(StreamId, Id, Version, Type)
+    internal record ChangeFeedDocument(
+        string StreamId,
+        string Id,
+        long Version,
+        string Type,
+        DateTimeOffset Timestamp,
+        string DataType,
+        [property: JsonConverter(typeof(BinaryDataConverter))] BinaryData Data,
+        string StateType,
+        [property: JsonConverter(typeof(BinaryDataConverter))] BinaryData State) : Document(StreamId, Id, Version, Type)
     {
         public bool IsEvent
             => string.Equals(Type, DocumentTypes.Event, StringComparison.OrdinalIgnoreCase);
@@ -14,13 +24,13 @@ namespace EventinatR.Cosmos.Documents
         public bool IsStream
             => string.Equals(Type, DocumentTypes.Stream, StringComparison.OrdinalIgnoreCase);
 
-        public EventDocument? ToEventDocument()
-            => IsEvent ? new EventDocument(StreamId, Id, Version, Timestamp, DataType, Data) : null;
+        public EventDocument ToEventDocument()
+            => IsEvent ? new EventDocument(StreamId, Id, Version, Timestamp, DataType, Data) : throw new InvalidOperationException("The document is not an event.");
 
-        public SnapshotDocument<T>? ToSnapshotDocument<T>()
-            => IsSnapshot ? new SnapshotDocument<T>(StreamId, Id, Version, StateType, State.ToObject<T>()) : null;
+        public SnapshotDocument ToSnapshotDocument()
+            => IsSnapshot ? new SnapshotDocument(StreamId, Id, Version, StateType, State) : throw new InvalidOperationException("The document is not a snapshot.");
 
-        public StreamDocument? ToStreamDocument()
-            => IsStream ? new StreamDocument(StreamId, Id, Version) : null;
+        public StreamDocument ToStreamDocument()
+            => IsStream ? new StreamDocument(StreamId, Id, Version) : throw new InvalidOperationException("The document is not a stream.");
     }
 }

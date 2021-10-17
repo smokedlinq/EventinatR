@@ -1,4 +1,6 @@
 using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
@@ -14,12 +16,18 @@ namespace EventinatR.Cosmos
         public CosmosEventStoreOptions()
         {
             EnableContentResponseOnWrite = false;
-            SerializerOptions = new CosmosSerializationOptions
+            Serializer = new CosmosEventStoreSerializer(this);
+            SerializerOptions = new JsonSerializerOptions
             {
-                IgnoreNullValues = true,
-                PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                NumberHandling = JsonNumberHandling.AllowReadingFromString
             };
         }
+
+        public new JsonSerializerOptions SerializerOptions { get; set; }
 
         public string? AccountEndpoint { get; set; }
         public string? AuthKeyOrTokenResource { get; set; }

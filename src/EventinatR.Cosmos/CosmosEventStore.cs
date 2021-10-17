@@ -1,4 +1,6 @@
 using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
@@ -31,13 +33,10 @@ namespace EventinatR.Cosmos
             });
         }
 
-        public async Task<Container> GetContainerAsync()
-            => await _container.ConfigureAwait(false);
-
         public override async Task<EventStream> GetStreamAsync(EventStreamId id, CancellationToken cancellationToken = default)
         {
             var container = await _container.ConfigureAwait(false);
-            return new CosmosEventStream(container, id);
+            return new CosmosEventStream(container, id, Options.SerializerOptions);
         }
 
         public async ValueTask DisposeAsync()
