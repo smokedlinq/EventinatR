@@ -2,6 +2,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("EventinatR.Tests")]
+
 namespace EventinatR
 {
     public abstract class EventStore

@@ -6,7 +6,7 @@ namespace EventinatR.Serialization
 {
     public static class DefaultEventDataConverter
     {
-        public static IEventConverterBuilder UseDefault<T>(this IEventConverterBuilder builder, JsonSerializerOptions? serializerOptions = null)
+        public static IEventConverterBuilder Use<T>(this IEventConverterBuilder builder, JsonSerializerOptions? serializerOptions = null)
         {
             var type = typeof(T);
             var options = Expression.Constant(serializerOptions ?? new JsonSerializerOptions
