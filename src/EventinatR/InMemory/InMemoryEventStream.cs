@@ -33,30 +33,44 @@ namespace EventinatR.InMemory
 
         public override Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken = default)
         {
+            _ = state ?? throw new ArgumentNullException(nameof(state));
+
             var type = typeof(T);
             var snapshot = new InMemoryEventStreamSnapshot<T>(this, version, state);
             _snapshots[type] = snapshot;
             return Task.FromResult<EventStreamSnapshot<T>>(snapshot);
         }
 
-        public override async Task<EventStreamVersion> AppendAsync<T>(IEnumerable<T> collection, CancellationToken cancellationToken = default)
+        public override Task<EventStreamVersion> AppendAsync<T>(IEnumerable<T> collection, CancellationToken cancellationToken = default)
         {
-            // Lock to prevent race condition on event version
-            await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            _ = collection ?? throw new ArgumentNullException(nameof(collection));
 
-            try
+            if (collection.Any(x => x is null))
             {
-                foreach (var data in collection)
-                {
-                    var @event = new Event(Id, _events.Count, DateTimeOffset.Now, data.GetType().FullName!, new BinaryData(data));
-                    _events.Add(@event);
-                }
-
-                return new EventStreamVersion(_events.Count);
+                throw new ArgumentException("The collection must not contain a null item.", nameof(collection));
             }
-            finally
+
+            return AppendAsync();
+
+            async Task<EventStreamVersion> AppendAsync()
             {
-                _lock.Release();
+                // Lock to prevent race condition on event version
+                await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+                try
+                {
+                    foreach (var data in collection)
+                    {
+                        var @event = new Event(Id, _events.Count + 1, DateTimeOffset.Now, data.GetType().FullName!, new BinaryData(data));
+                        _events.Add(@event);
+                    }
+
+                    return new EventStreamVersion(_events.Count);
+                }
+                finally
+                {
+                    _lock.Release();
+                }
             }
         }
 

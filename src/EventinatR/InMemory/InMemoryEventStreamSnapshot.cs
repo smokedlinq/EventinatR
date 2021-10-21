@@ -14,6 +14,6 @@ namespace EventinatR.InMemory
             => _stream = stream;
 
         public override IAsyncEnumerable<Event> ReadAsync(CancellationToken cancellationToken = default)
-            => _stream.ReadAsync(cancellationToken).Where(x => x.Version > Version.Value);
+            => _stream.ReadAsync(cancellationToken).Where(x => x.Version.Value > Version.Value);
     }
 }
