@@ -17,10 +17,6 @@ namespace EventinatR
 
         public EventStreamId Id { get; }
 
-        public virtual Task<EventStreamVersion> AppendAsync<T>(T @event, CancellationToken cancellationToken = default)
-            where T : class
-            => AppendAsync<T>(new[] { @event ?? throw new ArgumentNullException(nameof(@event)) }, cancellationToken);
-
         public abstract Task<EventStreamVersion> AppendAsync<T>(IEnumerable<T> events, CancellationToken cancellationToken = default)
             where T : class;
 
