@@ -77,7 +77,7 @@ namespace EventinatR.Tests.InMemory
             @event.Version.Should().Be(version);
         }
 
-        public record class EventData(int Value);
+        public record EventData(int Value);
         public record EventDataCollectionWithNull(IEnumerable<EventData> Events);
     }
 }
