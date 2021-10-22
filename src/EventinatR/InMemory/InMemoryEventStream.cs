@@ -36,7 +36,7 @@ internal class InMemoryEventStream : EventStream, IDisposable
         return Task.FromResult<EventStreamSnapshot<T>>(snapshot);
     }
 
-    public override Task<EventStreamVersion> AppendAsync<T>(IEnumerable<T> collection, CancellationToken cancellationToken = default)
+    public override Task<EventStreamVersion> AppendAsync<TEvent, TState>(IEnumerable<TEvent> collection, TState state, CancellationToken cancellationToken = default)
     {
         _ = collection ?? throw new ArgumentNullException(nameof(collection));
 
@@ -60,7 +60,14 @@ internal class InMemoryEventStream : EventStream, IDisposable
                     _events.Add(@event);
                 }
 
-                return new EventStreamVersion(_events.Count);
+                var version = new EventStreamVersion(_events.Count);
+
+                if (state is not null)
+                {
+                    await WriteSnapshotAsync(state, version, cancellationToken).ConfigureAwait(false);
+                }
+
+                return version;
             }
             finally
             {

@@ -132,9 +132,8 @@ public class Group
     {
         if (_uncommittedEvents.Count > 0)
         {
-            var version = await stream.AppendAsync(_uncommittedEvents);
+            _ = await stream.AppendAsync(_uncommittedEvents, new GroupState(Id, _members));
             _uncommittedEvents.Clear();
-            await stream.WriteSnapshotAsync(new GroupState(Id, _members), version);
         }
     }
 }

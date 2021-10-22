@@ -121,7 +121,7 @@ public class InMemoryEventStreamTests
     {
         var version = await stream.AppendAsync(events);
         await stream.WriteSnapshotAsync(state, version);
-        version = await stream.AppendAsync(events);
+        _ = await stream.AppendAsync(events);
         var snapshot = await stream.ReadSnapshotAsync<EventState>();
         var snapshotEvents = await snapshot.ReadAsync().ToListAsync();
         snapshotEvents.Count.Should().Be(events.Length);

@@ -77,31 +77,44 @@ namespace EventinatR.Cosmos
                 : new CosmosEventStreamSnapshot<T>(this, new EventStreamVersion(snapshot.Resource.Version), snapshot.Resource.State.ToObjectFromJson<T>(_serializerOptions));
         }
 
-        public override async Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken = default)
+        public override Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken = default)
+            => WriteSnapshotAsync<T>((document, eTag) =>
+            {
+                if (string.IsNullOrEmpty(eTag))
+                {
+                    return _container.CreateItemAsync(document, _partitionKey, cancellationToken: cancellationToken);
+                }
+                else
+                {
+                    var options = new ItemRequestOptions
+                    {
+                        IfMatchEtag = eTag
+                    };
+
+                    return _container.ReplaceItemAsync(document, document.Id, _partitionKey, options, cancellationToken);
+                }
+            }, state, version, cancellationToken);
+
+        protected async Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(Func<SnapshotDocument, string?, Task> callback, T state, EventStreamVersion version, CancellationToken cancellationToken)
         {
             var id = CosmosEventStreamSnapshot<T>.CreateSnapshotId(Id.Value);
             var snapshot = await ReadSnapshotAsync<T>(id, cancellationToken).ConfigureAwait(false);
-            var resource = new SnapshotDocument(Id.Value, id.Value, version.Value, typeof(T).FullName!, BinaryData.FromObjectAsJson(state, _serializerOptions));
+            var document = new SnapshotDocument(Id.Value, id.Value, version.Value, typeof(T).FullName!, BinaryData.FromObjectAsJson(state, _serializerOptions));
 
             if (snapshot is null)
             {
-                _ = await _container.CreateItemAsync(resource, _partitionKey, cancellationToken: cancellationToken).ConfigureAwait(false);
+                await callback(document, null).ConfigureAwait(false);
             }
             else
             {
-                var options = new ItemRequestOptions
-                {
-                    IfMatchEtag = snapshot.ETag
-                };
-
-                _ = await _container.ReplaceItemAsync(resource, id.Value, _partitionKey, options, cancellationToken).ConfigureAwait(false);
+                await callback(document, snapshot.ETag).ConfigureAwait(false);
             }
 
             return new CosmosEventStreamSnapshot<T>(this, version, state);
         }
 
-        public override Task<EventStreamVersion> AppendAsync<T>(IEnumerable<T> collection, CancellationToken cancellationToken = default)
-            where T : class
+        public override Task<EventStreamVersion> AppendAsync<TEvent, TState>(IEnumerable<TEvent> collection, TState state, CancellationToken cancellationToken = default)
+            where TEvent : class
         {
             if (collection.Any(x => x is null))
             {
@@ -147,6 +160,28 @@ namespace EventinatR.Cosmos
                     {
                         IfMatchEtag = stream.ETag
                     });
+                }
+
+                if (state is not null)
+                {
+                    await WriteSnapshotAsync((document, eTag) =>
+                    {
+                        if (string.IsNullOrEmpty(eTag))
+                        {
+                            batch.CreateItem(document);
+                        }
+                        else
+                        {
+                            var options = new TransactionalBatchItemRequestOptions
+                            {
+                                IfMatchEtag = eTag
+                            };
+
+                            batch.ReplaceItem(document.Id, document, options);
+                        }
+
+                        return Task.CompletedTask;
+                    }, state, version, cancellationToken).ConfigureAwait(false);
                 }
 
                 using var response = await batch.ExecuteAsync(cancellationToken).ConfigureAwait(false);

@@ -12,8 +12,12 @@ public abstract class EventStream : IEventStreamReader
 
     public EventStreamId Id { get; }
 
-    public abstract Task<EventStreamVersion> AppendAsync<T>(IEnumerable<T> events, CancellationToken cancellationToken = default)
-        where T : class;
+    public virtual Task<EventStreamVersion> AppendAsync<T>(IEnumerable<T> events, CancellationToken cancellationToken = default)
+        where T : class
+        => AppendAsync<T, object>(events, null!, cancellationToken);
+
+    public abstract Task<EventStreamVersion> AppendAsync<TEvent, TState>(IEnumerable<TEvent> events, TState state, CancellationToken cancellationToken = default)
+        where TEvent : class;
 
     public abstract IAsyncEnumerable<Event> ReadAsync(CancellationToken cancellationToken = default);
 
