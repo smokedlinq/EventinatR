@@ -1,10 +1,7 @@
-using System;
+namespace EventinatR.Serialization;
 
-namespace EventinatR.Serialization
+public interface IEventDataConverter
 {
-    public interface IEventDataConverter
-    {
-        bool CanConverter(Event @event);
-        object? Convert(BinaryData data);
-    }
+    bool CanConverter(Event @event);
+    object? Convert(BinaryData data);
 }

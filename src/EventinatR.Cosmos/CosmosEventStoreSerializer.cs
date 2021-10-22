@@ -1,26 +1,20 @@
-using System;
-using System.IO;
-using System.Text.Json;
-using Microsoft.Azure.Cosmos;
+namespace EventinatR.Cosmos;
 
-namespace EventinatR.Cosmos
+internal class CosmosEventStoreSerializer : CosmosSerializer
 {
-    internal class CosmosEventStoreSerializer : CosmosSerializer
+    private readonly CosmosEventStoreOptions _options;
+
+    public CosmosEventStoreSerializer(CosmosEventStoreOptions options)
+        => _options = options ?? throw new ArgumentNullException(nameof(options));
+
+    public override T FromStream<T>(Stream stream)
     {
-        private readonly CosmosEventStoreOptions _options;
-
-        public CosmosEventStoreSerializer(CosmosEventStoreOptions options)
-            => _options = options ?? throw new ArgumentNullException(nameof(options));
-
-        public override T FromStream<T>(Stream stream)
+        using (stream)
         {
-            using (stream)
-            {
-                return BinaryData.FromStream(stream).ToObjectFromJson<T>(_options.SerializerOptions);
-            }
+            return BinaryData.FromStream(stream).ToObjectFromJson<T>(_options.SerializerOptions);
         }
-
-        public override Stream ToStream<T>(T input)
-            => BinaryData.FromObjectAsJson(input, _options.SerializerOptions).ToStream();
     }
+
+    public override Stream ToStream<T>(T input)
+        => BinaryData.FromObjectAsJson(input, _options.SerializerOptions).ToStream();
 }

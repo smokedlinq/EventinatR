@@ -1,18 +1,16 @@
-using System;
 using System.Text.Json.Serialization;
-using EventinatR.Serialization;
 
-namespace EventinatR.Cosmos.Documents
+namespace EventinatR.Cosmos.Documents;
+
+internal record EventDocument(
+    string StreamId,
+    string Id,
+    long Version,
+    DateTimeOffset Timestamp,
+    string DataType,
+    [property: JsonConverter(typeof(BinaryDataConverter))] BinaryData Data)
+    : Document(StreamId, Id, Version, DocumentTypes.Event)
 {
-    internal record EventDocument(
-        string StreamId,
-        string Id,
-        long Version,
-        DateTimeOffset Timestamp,
-        string DataType,
-        [property: JsonConverter(typeof(BinaryDataConverter))] BinaryData Data) : Document(StreamId, Id, Version, DocumentTypes.Event)
-    {
-        public Event ToEvent()
-            => new(new EventStreamId(StreamId), Version, Timestamp, DataType, Data);
-    }
+    public Event ToEvent()
+        => new(new EventStreamId(StreamId), Version, Timestamp, DataType, Data);
 }

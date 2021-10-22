@@ -1,12 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Net;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using EventinatR.Cosmos.Documents;
-using Microsoft.Azure.Cosmos;
 
 namespace EventinatR.Cosmos
 {
@@ -63,11 +55,11 @@ namespace EventinatR.Cosmos
         public override IAsyncEnumerable<Event> ReadAsync(CancellationToken cancellationToken = default)
             => ReadFromVersionAsync(default, cancellationToken);
 
-        protected async Task<ItemResponse<SnapshotDocument>?> ReadSnapshotAsync<T>(string id, CancellationToken cancellationToken = default)
+        protected async Task<ItemResponse<SnapshotDocument>?> ReadSnapshotAsync<T>(EventStreamId id, CancellationToken cancellationToken = default)
         {
             try
             {
-                return await _container.ReadItemAsync<SnapshotDocument>(id, _partitionKey, cancellationToken: cancellationToken).ConfigureAwait(false);
+                return await _container.ReadItemAsync<SnapshotDocument>(id.Value, _partitionKey, cancellationToken: cancellationToken).ConfigureAwait(false);
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
@@ -89,7 +81,7 @@ namespace EventinatR.Cosmos
         {
             var id = CosmosEventStreamSnapshot<T>.CreateSnapshotId(Id.Value);
             var snapshot = await ReadSnapshotAsync<T>(id, cancellationToken).ConfigureAwait(false);
-            var resource = new SnapshotDocument(Id.Value, id, version.Value, typeof(T).FullName!, BinaryData.FromObjectAsJson(state, _serializerOptions));
+            var resource = new SnapshotDocument(Id.Value, id.Value, version.Value, typeof(T).FullName!, BinaryData.FromObjectAsJson(state, _serializerOptions));
 
             if (snapshot is null)
             {
@@ -102,55 +94,70 @@ namespace EventinatR.Cosmos
                     IfMatchEtag = snapshot.ETag
                 };
 
-                _ = await _container.ReplaceItemAsync(resource, id, _partitionKey, options, cancellationToken).ConfigureAwait(false);
+                _ = await _container.ReplaceItemAsync(resource, id.Value, _partitionKey, options, cancellationToken).ConfigureAwait(false);
             }
 
             return new CosmosEventStreamSnapshot<T>(this, version, state);
         }
 
-        public override async Task<EventStreamVersion> AppendAsync<T>(IEnumerable<T> collection, CancellationToken cancellationToken = default)
+        public override Task<EventStreamVersion> AppendAsync<T>(IEnumerable<T> collection, CancellationToken cancellationToken = default)
             where T : class
         {
-            var stream = await GetCosmosEventStreamResourceAsync(cancellationToken).ConfigureAwait(false);
-            var batch = _container.CreateTransactionalBatch(_partitionKey);
-            var version = stream?.Resource?.Version ?? default;
-
-            foreach (var item in collection)
+            if (collection.Any(x => x is null))
             {
-                if (item is not null)
+                throw new ArgumentException("The collection must not contain a null item.", nameof(collection));
+            }
+
+            return AppendAsync();
+
+            async Task<EventStreamVersion> AppendAsync()
+            {
+                var stream = await GetCosmosEventStreamResourceAsync(cancellationToken).ConfigureAwait(false);
+                var batch = _container.CreateTransactionalBatch(_partitionKey);
+                var version = stream?.Resource?.Version ?? default;
+
+                if (!collection.Any())
                 {
-                    version++;
-                    var id = $"{Id.Value}:{version}";
-                    var dataType = item.GetType().FullName ?? item.GetType().Name;
-                    var json = JsonSerializer.SerializeToUtf8Bytes(item, item.GetType(), _serializerOptions);
-                    var data = new BinaryData(json);
-                    var eventResource = new EventDocument(Id.Value, id, version, DateTimeOffset.Now, dataType, data);
-                    batch = batch.CreateItem(eventResource);
+                    return new EventStreamVersion(version);
                 }
-            }
 
-            var streamResource = new StreamDocument(Id.Value, Id.Value, version);
-
-            if (stream?.Resource is null)
-            {
-                batch = batch.CreateItem(streamResource);
-            }
-            else
-            {
-                batch = batch.ReplaceItem(streamResource.Id, streamResource, new TransactionalBatchItemRequestOptions
+                foreach (var item in collection)
                 {
-                    IfMatchEtag = stream.ETag
-                });
+                    if (item is not null)
+                    {
+                        version++;
+                        var id = $"{Id.Value}:{version}";
+                        var dataType = item.GetType().FullName ?? item.GetType().Name;
+                        var json = JsonSerializer.SerializeToUtf8Bytes(item, item.GetType(), _serializerOptions);
+                        var data = new BinaryData(json);
+                        var eventResource = new EventDocument(Id.Value, id, version, DateTimeOffset.Now, dataType, data);
+                        batch = batch.CreateItem(eventResource);
+                    }
+                }
+
+                var streamResource = new StreamDocument(Id.Value, Id.Value, version);
+
+                if (stream?.Resource is null)
+                {
+                    batch = batch.CreateItem(streamResource);
+                }
+                else
+                {
+                    batch = batch.ReplaceItem(streamResource.Id, streamResource, new TransactionalBatchItemRequestOptions
+                    {
+                        IfMatchEtag = stream.ETag
+                    });
+                }
+
+                using var response = await batch.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new CosmosEventStreamAppendException(response);
+                }
+
+                return new EventStreamVersion(version);
             }
-
-            using var response = await batch.ExecuteAsync(cancellationToken).ConfigureAwait(false);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new CosmosEventStreamAppendException(response);
-            }
-
-            return new EventStreamVersion(version);
         }
     }
 }

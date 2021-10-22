@@ -1,62 +1,56 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text.Json;
 
-namespace EventinatR.Serialization
+namespace EventinatR.Serialization;
+
+public class EventConverter
 {
-    public class EventConverter
+    private readonly List<IEventDataConverter> _converters = new();
+
+    public EventConverter(Action<IEventConverterBuilder> configure)
     {
-        private readonly List<IEventDataConverter> _converters = new();
+        var builder = new EventConverterBuilder(_converters);
+        configure(builder);
+        _converters.Reverse();
+    }
 
-        public EventConverter(Action<IEventConverterBuilder> configure)
+    protected EventConverter()
+    {
+    }
+
+    internal IEnumerable<IEventDataConverter> Converters => _converters.AsEnumerable();
+
+    public virtual bool TryConvert<T>(Event @event, [MaybeNullWhen(false)] out T result)
+    {
+        result = default;
+
+        var converter = _converters.FirstOrDefault(x => x.CanConverter(@event));
+        var obj = converter?.Convert(@event.Data);
+
+        if (obj is T value)
         {
-            var builder = new EventConverterBuilder(_converters);
-            configure(builder);
-            _converters.Reverse();
+            result = value;
+            return value is not null;
         }
 
-        protected EventConverter()
+        return false;
+    }
+
+    private class EventConverterBuilder : IEventConverterBuilder
+    {
+        private readonly ICollection<IEventDataConverter> _converters;
+
+        public EventConverterBuilder(ICollection<IEventDataConverter> converters)
+            => _converters = converters ?? throw new ArgumentNullException(nameof(converters));
+
+        public IEventConverterBuilder Use<T>()
+            where T : IEventDataConverter, new()
+            => Use(new T());
+
+        public IEventConverterBuilder Use<T>(T converter)
+            where T : IEventDataConverter
         {
-        }
-
-        internal IEnumerable<IEventDataConverter> Converters => _converters.AsEnumerable();
-
-        public virtual bool TryConvert<T>(Event @event, [MaybeNullWhen(false)] out T result)
-        {
-            result = default;
-
-            var converter = _converters.FirstOrDefault(x => x.CanConverter(@event));
-            var obj = converter?.Convert(@event.Data);
-
-            if (obj is T value)
-            {
-                result = value;
-                return value is not null;
-            }
-
-            return false;
-        }
-
-        private class EventConverterBuilder : IEventConverterBuilder
-        {
-            private readonly ICollection<IEventDataConverter> _converters;
-
-            public EventConverterBuilder(ICollection<IEventDataConverter> converters)
-                => _converters = converters ?? throw new ArgumentNullException(nameof(converters));
-
-            public IEventConverterBuilder Use<T>()
-                where T : IEventDataConverter, new()
-                => Use(new T());
-
-            public IEventConverterBuilder Use<T>(T converter)
-                where T : IEventDataConverter
-            {
-                _converters.Add(converter ?? throw new ArgumentNullException(nameof(converter)));
-                return this;
-            }
+            _converters.Add(converter ?? throw new ArgumentNullException(nameof(converter)));
+            return this;
         }
     }
 }

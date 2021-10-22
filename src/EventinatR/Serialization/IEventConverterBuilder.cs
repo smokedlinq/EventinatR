@@ -1,8 +1,7 @@
-namespace EventinatR.Serialization
+namespace EventinatR.Serialization;
+
+public interface IEventConverterBuilder
 {
-    public interface IEventConverterBuilder
-    {
-        IEventConverterBuilder Use<T>() where T : IEventDataConverter, new();
-        IEventConverterBuilder Use<T>(T converter) where T : IEventDataConverter;
-    }
+    IEventConverterBuilder Use<T>() where T : IEventDataConverter, new();
+    IEventConverterBuilder Use<T>(T converter) where T : IEventDataConverter;
 }
