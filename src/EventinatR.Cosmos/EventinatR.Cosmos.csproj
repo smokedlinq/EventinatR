@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
@@ -15,6 +15,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EventinatR\EventinatR.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="System.IO" />
+    <Using Include="System.Net" />
+    <Using Include="Microsoft.Azure.Cosmos" />
+    <Using Include="EventinatR.Cosmos.Documents" />
   </ItemGroup>
 
 </Project>

@@ -31,4 +31,13 @@
     <ProjectReference Include="..\..\src\EventinatR\EventinatR.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="AutoFixture" />
+    <Using Include="AutoFixture.AutoMoq" />
+    <Using Include="AutoFixture.Xunit2" />
+    <Using Include="FluentAssertions" />
+    <Using Include="Moq" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+
 </Project>
