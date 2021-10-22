@@ -126,4 +126,13 @@ public class InMemoryEventStreamTests
         var snapshotEvents = await snapshot.ReadAsync().ToListAsync();
         snapshotEvents.Count.Should().Be(events.Length);
     }
+
+    [Theory, InMemoryAutoData]
+    public async Task WhenAppendAsyncWithStateThenReadSnapshotAsyncShouldReturnState(EventStream stream, EventData[] events, EventState state)
+    {
+        await stream.AppendAsync(events, state);
+        var snapshot = await stream.ReadSnapshotAsync<EventState>();
+
+        snapshot.State.Should().Be(state);
+    }
 }
