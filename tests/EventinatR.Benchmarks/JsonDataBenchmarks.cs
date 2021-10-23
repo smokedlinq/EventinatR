@@ -16,7 +16,7 @@ namespace EventinatR.Benchmarks
 
         private JsonData[] _data = Array.Empty<JsonData>();
 
-        [Params(1, 10, 100, 1000)]
+        [Params(1, 10, 100)]
         public int Count { get; set; }
 
         [GlobalSetup]
@@ -36,6 +36,24 @@ namespace EventinatR.Benchmarks
         }
 
         [Benchmark()]
+        public void JsonDataAsJsonDocument()
+        {
+            foreach (var data in _data)
+            {
+                _ = data.As<JsonDocument>();
+            }
+        }
+
+        [Benchmark()]
+        public void JsonDataAsElement()
+        {
+            foreach (var data in _data)
+            {
+                _ = data.As<JsonElement>();
+            }
+        }
+
+        [Benchmark(Baseline = true)]
         public void JsonDataAsInherited()
         {
             foreach (var data in _data)

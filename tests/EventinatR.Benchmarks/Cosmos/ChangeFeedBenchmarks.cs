@@ -17,7 +17,7 @@ namespace EventinatR.Benchmarks.Cosmos
 
         private string _documents = string.Empty;
 
-        [Params(1, 10, 100, 1000)]
+        [Params(1, 10, 100)]
         public int Count { get; set; }
 
         [GlobalSetup]
