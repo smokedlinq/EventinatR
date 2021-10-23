@@ -1,6 +1,3 @@
-using System.Globalization;
-using System.Text.RegularExpressions;
-
 namespace EventinatR.Cosmos;
 
 internal class CosmosEventStreamSnapshot<T> : EventStreamSnapshot<T>

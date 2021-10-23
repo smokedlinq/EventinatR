@@ -4,7 +4,7 @@ namespace EventinatR;
 
 public record Event(EventStreamId StreamId, EventStreamVersion Version, DateTimeOffset Timestamp, JsonData Data)
 {
-    public bool TryConvert<T>([MaybeNullWhen(false)]out T result)
+    public bool TryConvert<T>([MaybeNullWhen(false)] out T result)
         where T : class
     {
         result = Data.As<T>();

@@ -4,7 +4,7 @@ namespace EventinatR;
 
 internal static class JsonDataDeserializer<T>
 {
-    private static readonly ConcurrentDictionary<JsonDataType, Func<BinaryData, JsonSerializerOptions, T?>> Types = new ();
+    private static readonly ConcurrentDictionary<JsonDataType, Func<BinaryData, JsonSerializerOptions, T?>> Types = new();
 
     public static T? Deserialize(JsonDataType type, BinaryData data, JsonSerializerOptions options)
     {

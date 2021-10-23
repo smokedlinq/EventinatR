@@ -1,6 +1,4 @@
-using EventinatR;
 using EventinatR.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

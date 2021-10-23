@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace EventinatR.Cosmos.Documents;
 
 internal record EventDocument(

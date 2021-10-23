@@ -1,5 +1,4 @@
 using EventinatR.InMemory;
-using static EventinatR.Tests.InMemory.InMemoryEventStreamTests;
 
 namespace EventinatR.Tests.InMemory;
 

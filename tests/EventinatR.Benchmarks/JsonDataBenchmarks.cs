@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AutoFixture;
 using BenchmarkDotNet.Attributes;
 
@@ -29,7 +24,7 @@ namespace EventinatR.Benchmarks
         [Benchmark()]
         public void JsonDataAsBase()
         {
-            foreach(var data in _data)
+            foreach (var data in _data)
             {
                 _ = data.As<BaseData>();
             }

@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using AutoFixture;
 using BenchmarkDotNet.Attributes;
 using EventinatR.Cosmos;
@@ -26,7 +21,7 @@ namespace EventinatR.Benchmarks.Cosmos
             var fixture = new Fixture();
 
             fixture.Register(() => JsonData.From(fixture.Create<Data>()));
-            
+
             var documents = fixture.CreateMany<EventDocument>(Count);
             var serializerOptions = new JsonSerializerOptions
             {
@@ -43,7 +38,7 @@ namespace EventinatR.Benchmarks.Cosmos
         {
             var events = CosmosEventStoreChangeFeed.ParseEvents(_documents);
 
-            foreach(var e in events)
+            foreach (var e in events)
             {
                 _ = e.Data.As<Data>();
             }
