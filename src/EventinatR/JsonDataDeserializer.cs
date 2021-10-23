@@ -8,6 +8,16 @@ internal static class JsonDataDeserializer<T>
 
     public static T? Deserialize(JsonDataType type, BinaryData data, JsonSerializerOptions options)
     {
+        if (typeof(T) == typeof(JsonDocument))
+        {
+            return FromJsonDocument(data, options);
+        }
+
+        if (typeof(T) == typeof(JsonElement))
+        {
+            return FromJsonElement(data, options);
+        }
+
         if (!Types.TryGetValue(type, out var func))
         {
             func = Create(type);
@@ -19,16 +29,6 @@ internal static class JsonDataDeserializer<T>
 
     private static Func<BinaryData, JsonSerializerOptions, T?> Create(JsonDataType type)
     {
-        if (typeof(T) == typeof(JsonDocument))
-        {
-            return FromJsonDocument;
-        }
-
-        if (typeof(T) == typeof(JsonElement))
-        {
-            return FromJsonElement;
-        }
-
         var desiredType = JsonDataType.For(typeof(T));
 
         if (desiredType == type)
@@ -59,14 +59,17 @@ internal static class JsonDataDeserializer<T>
         };
     }
 
-    private static T? FromJsonDocument(BinaryData data, JsonSerializerOptions options)
-    {
-        var value = JsonDocument.Parse(data, new JsonDocumentOptions
+    private static JsonDocument ParseJsonDocument(BinaryData data, JsonSerializerOptions options)
+        => JsonDocument.Parse(data, new JsonDocumentOptions
         {
             AllowTrailingCommas = options.AllowTrailingCommas,
             CommentHandling = options.ReadCommentHandling,
             MaxDepth = options.MaxDepth
         });
+
+    private static T? FromJsonDocument(BinaryData data, JsonSerializerOptions options)
+    {
+        var value = ParseJsonDocument(data, options);
 
         if (value is T document)
         {
@@ -78,12 +81,7 @@ internal static class JsonDataDeserializer<T>
 
     private static T? FromJsonElement(BinaryData data, JsonSerializerOptions options)
     {
-        var value = JsonDocument.Parse(data, new JsonDocumentOptions
-        {
-            AllowTrailingCommas = options.AllowTrailingCommas,
-            CommentHandling = options.ReadCommentHandling,
-            MaxDepth = options.MaxDepth
-        });
+        var value = ParseJsonDocument(data, options);
 
         if (value.RootElement is T element)
         {
