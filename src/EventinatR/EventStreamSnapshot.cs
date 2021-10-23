@@ -1,6 +1,6 @@
 namespace EventinatR;
 
-public abstract class EventStreamSnapshot<T> : IEventStreamReader
+public abstract class EventStreamSnapshot<T>
 {
     public EventStreamSnapshot(EventStreamId streamId, EventStreamVersion? version = null, T? state = default)
     {

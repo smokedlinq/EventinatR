@@ -3,15 +3,15 @@ using Azure.Core;
 
 namespace EventinatR.Cosmos;
 
-public class CosmosEventStoreOptions : CosmosClientOptions
+public class CosmosEventStoreOptions
 {
     public const string DefaultDatabaseId = "event-store";
     public const string DefaultContainerId = "events";
 
     public CosmosEventStoreOptions()
     {
-        EnableContentResponseOnWrite = false;
-        Serializer = new CosmosEventStoreSerializer(this);
+        CosmosClientOptions.EnableContentResponseOnWrite = false;
+        CosmosClientOptions.Serializer = new CosmosEventStoreSerializer(this);
         SerializerOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
@@ -22,7 +22,8 @@ public class CosmosEventStoreOptions : CosmosClientOptions
         };
     }
 
-    public new JsonSerializerOptions SerializerOptions { get; set; }
+    public JsonSerializerOptions SerializerOptions { get; set; }
+    public CosmosClientOptions CosmosClientOptions { get; } = new CosmosClientOptions();
 
     public string? AccountEndpoint { get; set; }
     public string? AuthKeyOrTokenResource { get; set; }
@@ -37,7 +38,7 @@ public class CosmosEventStoreOptions : CosmosClientOptions
 
         if (!string.IsNullOrEmpty(ConnectionString))
         {
-            client = new CosmosClient(ConnectionString, this);
+            client = new CosmosClient(ConnectionString, CosmosClientOptions);
         }
         else if (string.IsNullOrEmpty(AccountEndpoint))
         {
@@ -49,11 +50,11 @@ public class CosmosEventStoreOptions : CosmosClientOptions
         }
         else if (credential is null)
         {
-            client = new CosmosClient(AccountEndpoint, AuthKeyOrTokenResource, this);
+            client = new CosmosClient(AccountEndpoint, AuthKeyOrTokenResource, CosmosClientOptions);
         }
         else
         {
-            client = new CosmosClient(AccountEndpoint, credential, this);
+            client = new CosmosClient(AccountEndpoint, credential, CosmosClientOptions);
         }
 
         return client;

@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\EventinatR.Cosmos\EventinatR.Cosmos.csproj" />
+    <ProjectReference Include="..\..\src\EventinatR.DependencyInjection\EventinatR.DependencyInjection.csproj" />
     <ProjectReference Include="..\..\src\EventinatR\EventinatR.csproj" />
   </ItemGroup>
 

@@ -6,6 +6,5 @@ internal record SnapshotDocument(
     string StreamId,
     string Id,
     long Version,
-    string StateType,
-    [property: JsonConverter(typeof(BinaryDataConverter))] BinaryData State)
+    JsonData State)
     : Document(StreamId, Id, Version, DocumentTypes.Snapshot);

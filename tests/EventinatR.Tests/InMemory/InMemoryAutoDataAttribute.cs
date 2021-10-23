@@ -3,6 +3,10 @@ using static EventinatR.Tests.InMemory.InMemoryEventStreamTests;
 
 namespace EventinatR.Tests.InMemory;
 
+public record TestEvent(int Value);
+public record class TestEventCollectionWithNull(IEnumerable<TestEvent> Events);
+public record TestState(int State);
+
 internal class InMemoryAutoDataAttribute : MoqDataAttribute
 {
     public InMemoryAutoDataAttribute()
@@ -18,8 +22,8 @@ internal class InMemoryAutoDataAttribute : MoqDataAttribute
         fixture.Register<EventStream>(()
             => fixture.Create<EventStore>().GetStreamAsync(fixture.Create<EventStreamId>()).Result);
 
-        fixture.Register<EventDataCollectionWithNull>(()
-            => new(new EventData?[]
+        fixture.Register<TestEventCollectionWithNull>(()
+            => new(new TestEvent?[]
             {
                     new(1),
                     null,

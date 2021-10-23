@@ -1,6 +1,13 @@
-using System.Text.Json.Serialization;
-using EventinatR.Serialization;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EventinatR;
 
-public record Event(EventStreamId StreamId, EventStreamVersion Version, DateTimeOffset Timestamp, string Type, [property: JsonConverter(typeof(BinaryDataConverter))] BinaryData Data);
+public record Event(EventStreamId StreamId, EventStreamVersion Version, DateTimeOffset Timestamp, JsonData Data)
+{
+    public bool TryConvert<T>([MaybeNullWhen(false)]out T result)
+        where T : class
+    {
+        result = Data.As<T>();
+        return result is not null;
+    }
+}

@@ -35,7 +35,7 @@ namespace EventinatR.Cosmos
 
                 foreach (var doc in page)
                 {
-                    yield return new Event(Id, doc.Version, doc.Timestamp, doc.DataType, new BinaryData(doc.Data.ToString()));
+                    yield return doc.ToEvent();
                 }
             }
         }
@@ -74,7 +74,7 @@ namespace EventinatR.Cosmos
 
             return snapshot is null
                 ? new CosmosEventStreamSnapshot<T>(this)
-                : new CosmosEventStreamSnapshot<T>(this, new EventStreamVersion(snapshot.Resource.Version), snapshot.Resource.State.ToObjectFromJson<T>(_serializerOptions));
+                : new CosmosEventStreamSnapshot<T>(this, new EventStreamVersion(snapshot.Resource.Version), snapshot.Resource.State.As<T>());
         }
 
         public override Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken = default)
@@ -99,7 +99,7 @@ namespace EventinatR.Cosmos
         {
             var id = CosmosEventStreamSnapshot<T>.CreateSnapshotId(Id.Value);
             var snapshot = await ReadSnapshotAsync<T>(id, cancellationToken).ConfigureAwait(false);
-            var document = new SnapshotDocument(Id.Value, id.Value, version.Value, typeof(T).FullName!, BinaryData.FromObjectAsJson(state, _serializerOptions));
+            var document = new SnapshotDocument(Id.Value, id.Value, version.Value, JsonData.From(state, _serializerOptions));
 
             if (snapshot is null)
             {
@@ -114,7 +114,6 @@ namespace EventinatR.Cosmos
         }
 
         public override Task<EventStreamVersion> AppendAsync<TEvent, TState>(IEnumerable<TEvent> collection, TState state, CancellationToken cancellationToken = default)
-            where TEvent : class
         {
             if (collection.Any(x => x is null))
             {
@@ -140,10 +139,8 @@ namespace EventinatR.Cosmos
                     {
                         version++;
                         var id = $"{Id.Value}:{version}";
-                        var dataType = item.GetType().FullName ?? item.GetType().Name;
-                        var json = JsonSerializer.SerializeToUtf8Bytes(item, item.GetType(), _serializerOptions);
-                        var data = new BinaryData(json);
-                        var eventResource = new EventDocument(Id.Value, id, version, DateTimeOffset.Now, dataType, data);
+                        var data = JsonData.From(item, _serializerOptions);
+                        var eventResource = new EventDocument(Id.Value, id, version, DateTimeOffset.Now, data);
                         batch = batch.CreateItem(eventResource);
                     }
                 }

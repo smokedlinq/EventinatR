@@ -1,6 +1,8 @@
-namespace System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
-public class BinaryDataConverter : JsonConverter<BinaryData>
+namespace EventinatR;
+
+internal class BinaryDataConverter : JsonConverter<BinaryData>
 {
     public override BinaryData Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         => new(JsonDocument.ParseValue(ref reader).RootElement.GetRawText());

@@ -56,7 +56,7 @@ internal class InMemoryEventStream : EventStream, IDisposable
             {
                 foreach (var data in collection)
                 {
-                    var @event = new Event(Id, _events.Count + 1, DateTimeOffset.Now, data.GetType().FullName!, new BinaryData(data));
+                    var @event = new Event(Id, _events.Count + 1, DateTimeOffset.Now, JsonData.From(data));
                     _events.Add(@event);
                 }
 

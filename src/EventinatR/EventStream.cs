@@ -1,6 +1,6 @@
 namespace EventinatR;
 
-public abstract class EventStream : IEventStreamReader
+public abstract class EventStream
 {
     protected EventStream()
         : this(EventStreamId.None)

@@ -1,7 +1,6 @@
 using System.Text.Json.Serialization;
-using EventinatR.Serialization;
 
-namespace EventinatR.Tests.Serialization;
+namespace EventinatR.Tests;
 
 public class BinaryDataConverterTests
 {

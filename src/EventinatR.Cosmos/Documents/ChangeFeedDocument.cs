@@ -8,10 +8,8 @@ internal record ChangeFeedDocument(
     long Version,
     string Type,
     DateTimeOffset Timestamp,
-    string DataType,
-    [property: JsonConverter(typeof(BinaryDataConverter))] BinaryData Data,
-    string StateType,
-    [property: JsonConverter(typeof(BinaryDataConverter))] BinaryData State)
+    JsonData? Data,
+    JsonData? State)
 {
     public bool IsEvent
         => string.Equals(Type, DocumentTypes.Event, StringComparison.OrdinalIgnoreCase);
@@ -23,10 +21,10 @@ internal record ChangeFeedDocument(
         => string.Equals(Type, DocumentTypes.Stream, StringComparison.OrdinalIgnoreCase);
 
     public EventDocument ToEventDocument()
-        => IsEvent ? new EventDocument(StreamId, Id, Version, Timestamp, DataType, Data) : throw new InvalidOperationException("The document is not an event.");
+        => IsEvent ? new EventDocument(StreamId, Id, Version, Timestamp, Data!) : throw new InvalidOperationException("The document is not an event.");
 
     public SnapshotDocument ToSnapshotDocument()
-        => IsSnapshot ? new SnapshotDocument(StreamId, Id, Version, StateType, State) : throw new InvalidOperationException("The document is not a snapshot.");
+        => IsSnapshot ? new SnapshotDocument(StreamId, Id, Version, State!) : throw new InvalidOperationException("The document is not a snapshot.");
 
     public StreamDocument ToStreamDocument()
         => IsStream ? new StreamDocument(StreamId, Id, Version) : throw new InvalidOperationException("The document is not a stream.");

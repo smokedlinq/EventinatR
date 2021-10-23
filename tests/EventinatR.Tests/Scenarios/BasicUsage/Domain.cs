@@ -1,5 +1,3 @@
-using EventinatR.Serialization;
-
 namespace EventinatR.Tests.Scenarios.BasicUsage;
 
 public record GroupMember(string Name);
@@ -13,13 +11,6 @@ public record GroupEvent
     public record Created(GroupId Id) : GroupEvent;
     public record AddedMember(GroupId Id, GroupMember Member) : GroupEvent;
     public record RemovedMember(GroupId Id, GroupMember Member) : GroupEvent;
-
-    public static readonly EventConverter Converter = new(builder =>
-    {
-        builder.Use<Created>();
-        builder.Use<AddedMember>();
-        builder.Use<RemovedMember>();
-    });
 }
 
 public class Group
@@ -117,9 +108,9 @@ public class Group
 
         foreach (var e in events)
         {
-            if (!GroupEvent.Converter.TryConvert<GroupEvent>(e, out var groupEvent))
+            if (!e.TryConvert<GroupEvent>(out var groupEvent))
             {
-                throw new InvalidOperationException($"The event {e.Type} is not supported.");
+                throw new InvalidOperationException($"The event {e.Data} is not supported.");
             }
 
             group.ApplyEvent(groupEvent);
