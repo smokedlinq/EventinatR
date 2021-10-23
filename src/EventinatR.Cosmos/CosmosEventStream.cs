@@ -78,7 +78,7 @@ namespace EventinatR.Cosmos
         }
 
         public override Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken = default)
-            => WriteSnapshotAsync<T>((document, eTag) =>
+            => WriteSnapshotAsync((document, eTag) =>
             {
                 if (string.IsNullOrEmpty(eTag))
                 {

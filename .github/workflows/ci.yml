@@ -32,3 +32,12 @@ jobs:
 
     - name: Unit tests
       run: dotnet test --configuration Release --logger 'console;verbosity=detailed' /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+
+    - name: Benchmark tests
+      run: dotnet run --configuration Release --project ./tests/EventinatR.Benchmarks/EventinatR.Benchmarks.csproj
+
+    - name: Upload benchmark artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: BenchmarkDotNet.Artifacts
+        path: ./BenchmarkDotNet.Artifacts/
