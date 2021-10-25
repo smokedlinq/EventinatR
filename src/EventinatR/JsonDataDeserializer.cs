@@ -4,7 +4,8 @@ namespace EventinatR;
 
 internal static class JsonDataDeserializer<T>
 {
-    private static readonly ConcurrentDictionary<JsonDataType, Func<BinaryData, JsonSerializerOptions, T?>> Types = new();
+    private delegate T? JsonDataConverter(BinaryData data, JsonSerializerOptions options);
+    private static readonly ConcurrentDictionary<JsonDataType, JsonDataConverter> Types = new();
 
     public static T? Deserialize(JsonDataType type, BinaryData data, JsonSerializerOptions options)
     {
@@ -27,7 +28,7 @@ internal static class JsonDataDeserializer<T>
         return func(data, options);
     }
 
-    private static Func<BinaryData, JsonSerializerOptions, T?> Create(JsonDataType type)
+    private static JsonDataConverter Create(JsonDataType type)
     {
         var desiredType = JsonDataType.For(typeof(T));
 
@@ -36,27 +37,20 @@ internal static class JsonDataDeserializer<T>
             return (data, options) => data.ToObjectFromJson<T>(options);
         }
 
-        var actualType = Type.GetType(type.Name, false, true);
-
-        if (actualType is null)
+        if (type.TryToType(out var actualType))
         {
-            actualType = Type.GetType($"{type.Name}, {type.Assembly}", false, true);
-        }
-
-        if (actualType is null)
-        {
-            return (data, options) => data.ToObjectFromJson<T>(options);
-        }
-
-        return (data, options) =>
-        {
-            var value = JsonSerializer.Deserialize(data, actualType, options);
-            if (value is T result)
+            return (data, options) =>
             {
-                return result;
-            }
-            return default;
-        };
+                var value = JsonSerializer.Deserialize(data, actualType, options);
+                if (value is T result)
+                {
+                    return result;
+                }
+                return default;
+            };
+        }
+
+        return (data, options) => data.ToObjectFromJson<T>(options);
     }
 
     private static JsonDocument ParseJsonDocument(BinaryData data, JsonSerializerOptions options)

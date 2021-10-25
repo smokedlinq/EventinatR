@@ -1,7 +1,7 @@
 namespace EventinatR.Cosmos.Documents;
 
 internal record ChangeFeedDocument(
-    string StreamId,
+    string Stream,
     string Id,
     long Version,
     string Type,
@@ -19,11 +19,11 @@ internal record ChangeFeedDocument(
         => string.Equals(Type, DocumentTypes.Stream, StringComparison.OrdinalIgnoreCase);
 
     public EventDocument ToEventDocument()
-        => IsEvent ? new EventDocument(StreamId, Id, Version, Timestamp, Data!) : throw new InvalidOperationException("The document is not an event.");
+        => IsEvent ? new EventDocument(Stream, Id, Version, Timestamp, Data!) : throw new InvalidOperationException("The document is not an event.");
 
     public SnapshotDocument ToSnapshotDocument()
-        => IsSnapshot ? new SnapshotDocument(StreamId, Id, Version, State!) : throw new InvalidOperationException("The document is not a snapshot.");
+        => IsSnapshot ? new SnapshotDocument(Stream, Id, Version, State!) : throw new InvalidOperationException("The document is not a snapshot.");
 
     public StreamDocument ToStreamDocument()
-        => IsStream ? new StreamDocument(StreamId, Id, Version) : throw new InvalidOperationException("The document is not a stream.");
+        => IsStream ? new StreamDocument(Stream, Id, Version) : throw new InvalidOperationException("The document is not a stream.");
 }

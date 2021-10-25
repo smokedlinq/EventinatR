@@ -32,7 +32,7 @@ public class CosmosEventStoreOptions
     public int? Throughput { get; set; }
     public CosmosEventStoreContainerOptions Container { get; } = new(DefaultContainerId);
 
-    public CosmosClient CreateCosmosClient(TokenCredential? credential = null)
+    public virtual CosmosClient CreateCosmosClient(TokenCredential? credential = null)
     {
         CosmosClient client;
 
@@ -60,7 +60,7 @@ public class CosmosEventStoreOptions
         return client;
     }
 
-    public async Task<CosmosClient> CreateAndInitializeCosmosClientAsync(TokenCredential? credential = null, CancellationToken cancellationToken = default)
+    public virtual async Task<CosmosClient> CreateAndInitializeCosmosClientAsync(TokenCredential? credential = null, CancellationToken cancellationToken = default)
     {
         var client = CreateCosmosClient(credential);
 
@@ -68,7 +68,7 @@ public class CosmosEventStoreOptions
 
         var db = client.GetDatabase(DatabaseId);
 
-        _ = await db.CreateContainerIfNotExistsAsync(Container.Id, "/streamId", Container.Throughput, cancellationToken: cancellationToken).ConfigureAwait(false);
+        _ = await db.CreateContainerIfNotExistsAsync(Container.Id, "/stream", Container.Throughput, cancellationToken: cancellationToken).ConfigureAwait(false);
 
         return client;
     }

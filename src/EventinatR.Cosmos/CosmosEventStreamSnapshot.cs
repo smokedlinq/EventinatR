@@ -11,7 +11,7 @@ internal class CosmosEventStreamSnapshot<T> : EventStreamSnapshot<T>
     public override IAsyncEnumerable<Event> ReadAsync(CancellationToken cancellationToken = default)
         => _stream.ReadFromVersionAsync(Version.Value, cancellationToken);
 
-    public static EventStreamId CreateSnapshotId(EventStreamId streamId)
+    internal static EventStreamId CreateSnapshotId(EventStreamId streamId)
         => streamId + EventStreamId.ConvertTo<T>();
 
 }

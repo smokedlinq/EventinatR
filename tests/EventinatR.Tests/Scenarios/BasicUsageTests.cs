@@ -1,6 +1,6 @@
 using EventinatR.InMemory;
 
-namespace EventinatR.Tests.Scenarios.BasicUsage
+namespace EventinatR.Tests.Scenarios
 {
     public class BasicUsageTests
     {

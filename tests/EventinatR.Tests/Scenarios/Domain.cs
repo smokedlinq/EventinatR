@@ -1,4 +1,4 @@
-namespace EventinatR.Tests.Scenarios.BasicUsage;
+namespace EventinatR.Tests.Scenarios;
 
 public record GroupMember(string Name);
 public record GroupId(string Name)

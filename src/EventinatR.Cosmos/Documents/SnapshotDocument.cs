@@ -1,8 +1,8 @@
 namespace EventinatR.Cosmos.Documents;
 
 internal record SnapshotDocument(
-    string StreamId,
+    string Stream,
     string Id,
     long Version,
     JsonData State)
-    : Document(StreamId, Id, Version, DocumentTypes.Snapshot);
+    : Document(Stream, Id, Version, DocumentTypes.Snapshot);

@@ -1,4 +1,4 @@
 namespace EventinatR.Cosmos.Documents;
 
-internal record StreamDocument(string StreamId, string Id, long Version)
-    : Document(StreamId, Id, Version, DocumentTypes.Stream);
+internal record StreamDocument(string Stream, string Id, long Version)
+    : Document(Stream, Id, Version, DocumentTypes.Stream);
