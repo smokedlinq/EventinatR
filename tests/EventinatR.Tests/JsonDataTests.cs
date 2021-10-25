@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace EventinatR.Tests
 {
     public class JsonDataTests
@@ -5,6 +7,7 @@ namespace EventinatR.Tests
         public abstract record BaseEvent;
         public record TestEvent(int Value) : BaseEvent;
         public record LooksLikeTestEvent(int Value);
+        public record NotATestThatIsConvertable;
 
         [Fact]
         public void CanConvertFromObject()
@@ -31,7 +34,7 @@ namespace EventinatR.Tests
         public void CannotConvertToObjectWhenTargetTypeIsNotFound(TestEvent value)
         {
             var data = JsonData.From(value);
-            var obj = data.As<string>();
+            var obj = data.As<NotATestThatIsConvertable>();
 
             obj.Should().BeNull();
         }
@@ -78,6 +81,58 @@ namespace EventinatR.Tests
             var element = data.As<JsonElement>();
 
             element.Should().NotBeNull();
+        }
+
+        [Theory]
+        [MoqData]
+        public void CanConvertToBinaryData(TestEvent value)
+        {
+            var data = JsonData.From(value);
+            var obj = data.As<BinaryData>();
+
+            obj.Should().NotBeNull();
+        }
+
+        [Theory]
+        [MoqData]
+        public void CanConvertToString(TestEvent value)
+        {
+            var data = JsonData.From(value);
+            var obj = data.As<string>();
+
+            obj.Should().NotBeNull();
+        }
+
+        [Theory]
+        [MoqData]
+        public void CanConvertToByteArray(TestEvent value)
+        {
+            var data = JsonData.From(value);
+            var array = data.As<byte[]>();
+
+            array.Should().NotBeNull();
+            array!.Length.Should().BeGreaterThan(0);
+        }
+
+        [Theory]
+        [MoqData]
+        public void CanConvertToReadOnlyMemoryOfByte(TestEvent value)
+        {
+            var data = JsonData.From(value);
+            var memory = data.As<ReadOnlyMemory<byte>>();
+
+            memory.Should().NotBeNull();
+            memory!.Length.Should().BeGreaterThan(0);
+        }
+
+        [Theory]
+        [MoqData]
+        public void CanConvertToStream(TestEvent value)
+        {
+            var data = JsonData.From(value);
+            var stream = data.As<Stream>();
+
+            stream.Should().NotBeNull();
         }
     }
 }
