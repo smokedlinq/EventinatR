@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 
 namespace EventinatR;
 
@@ -37,6 +39,31 @@ internal static class JsonDataDeserializer<T>
             return (data, options) => data.ToObjectFromJson<T>(options);
         }
 
+        if (typeof(T) == typeof(BinaryData))
+        {
+            return (data, options) => From<BinaryData>(data);
+        }
+
+        if (typeof(T) == typeof(Stream))
+        {
+            return (data, options) => From<Stream>(data.ToStream());
+        }
+
+        if (typeof(T) == typeof(byte[]))
+        {
+            return (data, options) => From<byte[]>(data.ToArray());
+        }
+
+        if (typeof(T) == typeof(string))
+        {
+            return (data, options) => From<string>(data.ToString());
+        }
+
+        if (typeof(T) == typeof(ReadOnlyMemory<byte>))
+        {
+            return (data, options) => From<ReadOnlyMemory<byte>>(data.ToMemory());
+        }
+
         if (type.TryToType(out var actualType))
         {
             return (data, options) =>
@@ -52,6 +79,9 @@ internal static class JsonDataDeserializer<T>
 
         return (data, options) => data.ToObjectFromJson<T>(options);
     }
+
+    private static T? From<TSource>(TSource source)
+        => source is T result ? result : default;
 
     private static JsonDocument ParseJsonDocument(BinaryData data, JsonSerializerOptions options)
         => JsonDocument.Parse(data, new JsonDocumentOptions
