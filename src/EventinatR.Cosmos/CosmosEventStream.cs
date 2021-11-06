@@ -90,14 +90,14 @@ internal class CosmosEventStream : EventStream
     }
 
     public override Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken = default)
-        => WriteSnapshotAsync(state, version, cancellationToken, (document, eTag) =>
+        => WriteSnapshotAsync(state, version, (document, eTag) =>
             _container.UpsertItemAsync(document, _partitionKey, new ItemRequestOptions
             {
                 EnableContentResponseOnWrite = false,
                 IfMatchEtag = eTag
-            }, cancellationToken));
+            }, cancellationToken), cancellationToken);
 
-    private async Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken, Func<SnapshotDocument, string?, Task> callback)
+    private async Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, Func<SnapshotDocument, string?, Task> callback, CancellationToken cancellationToken)
     {
         var id = CosmosEventStreamSnapshot<T>.CreateSnapshotId(Id.Value);
         var snapshot = await ReadSnapshotAsync<T>(id, cancellationToken).ConfigureAwait(false);
@@ -132,6 +132,7 @@ internal class CosmosEventStream : EventStream
             {
                 EnableContentResponseOnWrite = false
             };
+
             foreach (var item in collection)
             {
                 version++;
@@ -149,7 +150,7 @@ internal class CosmosEventStream : EventStream
 
             if (state is not null)
             {
-                await WriteSnapshotAsync(state, version, cancellationToken, (document, eTag) =>
+                await WriteSnapshotAsync(state, version, (document, eTag) =>
                 {
                     batch.UpsertItem(document, new TransactionalBatchItemRequestOptions
                     {
@@ -158,7 +159,7 @@ internal class CosmosEventStream : EventStream
                     });
 
                     return Task.CompletedTask;
-                }).ConfigureAwait(false);
+                }, cancellationToken).ConfigureAwait(false);
             }
 
             using var response = await batch.ExecuteAsync(cancellationToken).ConfigureAwait(false);
