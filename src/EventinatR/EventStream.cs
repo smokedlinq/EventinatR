@@ -12,6 +12,8 @@ public abstract class EventStream
 
     public EventStreamId Id { get; }
 
+    public abstract Task<EventStreamVersion> GetVersionAsync(CancellationToken cancellationToken = default);
+
     public virtual Task<EventStreamVersion> AppendAsync<T>(IEnumerable<T> events, CancellationToken cancellationToken = default)
         where T : class
         => AppendAsync<T, object>(events, null!, cancellationToken);

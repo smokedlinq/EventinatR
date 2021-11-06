@@ -52,6 +52,18 @@ internal class CosmosEventStream : EventStream
         }
     }
 
+    public override async Task<EventStreamVersion> GetVersionAsync(CancellationToken cancellationToken = default)
+    {
+        var document = await GetCosmosEventStreamResourceAsync(cancellationToken).ConfigureAwait(false);
+
+        if (document is null)
+        {
+            return EventStreamVersion.None;
+        }
+
+        return document.Resource.Version;
+    }
+
     public override IAsyncEnumerable<Event> ReadAsync(CancellationToken cancellationToken = default)
         => ReadFromVersionAsync(default, cancellationToken);
 

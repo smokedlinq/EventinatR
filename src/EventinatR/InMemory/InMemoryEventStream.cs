@@ -13,6 +13,9 @@ internal class InMemoryEventStream : EventStream, IDisposable
     {
     }
 
+    public override Task<EventStreamVersion> GetVersionAsync(CancellationToken cancellationToken = default)
+        => Task.FromResult(new EventStreamVersion(_events.Count));
+
     public override IAsyncEnumerable<Event> ReadAsync(CancellationToken cancellationToken = default)
         => _events.ToAsyncEnumerable();
 
