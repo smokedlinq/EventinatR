@@ -90,14 +90,14 @@ internal class CosmosEventStream : EventStream
     }
 
     public override Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken = default)
-        => WriteSnapshotAsync(state, version, (document, eTag) =>
+        => CreateSnapshotAsync(state, version, (document, eTag) =>
             _container.UpsertItemAsync(document, _partitionKey, new ItemRequestOptions
             {
                 EnableContentResponseOnWrite = false,
                 IfMatchEtag = eTag
             }, cancellationToken), cancellationToken);
 
-    private async Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, Func<SnapshotDocument, string?, Task> callback, CancellationToken cancellationToken)
+    private async Task<EventStreamSnapshot<T>> CreateSnapshotAsync<T>(T state, EventStreamVersion version, Func<SnapshotDocument, string?, Task> callback, CancellationToken cancellationToken)
     {
         var id = CosmosEventStreamSnapshot<T>.CreateSnapshotId(Id.Value);
         var snapshot = await ReadSnapshotAsync<T>(id, cancellationToken).ConfigureAwait(false);
@@ -150,7 +150,7 @@ internal class CosmosEventStream : EventStream
 
             if (state is not null)
             {
-                await WriteSnapshotAsync(state, version, (document, eTag) =>
+                await CreateSnapshotAsync(state, version, (document, eTag) =>
                 {
                     batch.UpsertItem(document, new TransactionalBatchItemRequestOptions
                     {

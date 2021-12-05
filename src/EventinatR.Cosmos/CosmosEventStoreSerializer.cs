@@ -11,10 +11,14 @@ internal class CosmosEventStoreSerializer : CosmosSerializer
     {
         using (stream)
         {
-            return BinaryData.FromStream(stream).ToObjectFromJson<T>(_options.SerializerOptions);
+            return BinaryData
+                .FromStream(stream)
+                .ToObjectFromJson<T>(_options.SerializerOptions)!;
         }
     }
 
     public override Stream ToStream<T>(T input)
-        => BinaryData.FromObjectAsJson(input, _options.SerializerOptions).ToStream();
+        => BinaryData
+            .FromObjectAsJson(input, _options.SerializerOptions)
+            .ToStream();
 }
