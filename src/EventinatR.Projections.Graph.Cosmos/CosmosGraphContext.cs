@@ -17,7 +17,7 @@ public abstract class CosmosGraphContext : GraphContext
         _logger = logger;
     }
 
-    protected virtual ICosmosDbConfigurator ConfigureCosmosDb(ICosmosDbConfigurator configurator)
+    protected virtual ICosmosDbConfigurator ConfigureCosmos(ICosmosDbConfigurator configurator)
         => configurator;
 
     protected override IGremlinQuerySource ConfigureSource(IConfigurableGremlinQuerySource source)
@@ -42,7 +42,7 @@ public abstract class CosmosGraphContext : GraphContext
                     return c;
                 }));
 
-            return ConfigureCosmosDb(configurator)
-                ?? throw new InvalidOperationException($"The {GetType().FullName} context did not configure CosmosDb.");
+            return ConfigureCosmos(configurator)
+                ?? throw new InvalidOperationException($"The {GetType().FullName} context did not configure Cosmos.");
         });
 }
