@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventinatR.DependencyInject
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventinatR.Benchmarks", "tests\EventinatR.Benchmarks\EventinatR.Benchmarks.csproj", "{8EC6406A-B97F-4FCE-9112-CFBF7E5565B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventinatR.Projections.Graph.Cosmos", "EventinatR.Projections.Graph.Cosmos\EventinatR.Projections.Graph.Cosmos.csproj", "{BB778DF2-2588-4688-AA7F-18476E636564}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventinatR.Projections.Graph.Cosmos", "src\EventinatR.Projections.Graph.Cosmos\EventinatR.Projections.Graph.Cosmos.csproj", "{BB778DF2-2588-4688-AA7F-18476E636564}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

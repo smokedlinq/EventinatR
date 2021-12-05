@@ -33,7 +33,7 @@ namespace EventinatR.Benchmarks.Cosmos
             _documents = JsonSerializer.Serialize(documents, serializerOptions);
         }
 
-        //[Benchmark()]
+        [Benchmark()]
         public void ParseEvents()
         {
             var events = CosmosEventStoreChangeFeed.ParseEvents(_documents);
