@@ -8,7 +8,7 @@ public abstract class GraphContext : IStartGremlinQuery
 {
     private readonly Lazy<IGremlinQuerySource> _source;
 
-    public GraphContext(IOptions<GraphContextOptions> options, ILogger? logger = null)
+    public GraphContext(ILogger? logger = null)
     {
         var environment = GremlinQuerySource.g
             .ConfigureEnvironment(env =>
