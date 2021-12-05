@@ -17,6 +17,10 @@ public abstract class CosmosGraphContext : GraphContext
         _logger = logger;
     }
 
+    protected CosmosGraphContext()
+        : base(null)
+        => _options = new CosmosGraphContextOptions();
+
     protected virtual ICosmosDbConfigurator ConfigureCosmos(ICosmosDbConfigurator configurator)
         => configurator;
 
