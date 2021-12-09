@@ -23,7 +23,8 @@ public class CosmosEventStoreOptions
     }
 
     public JsonSerializerOptions SerializerOptions { get; set; }
-    public CosmosClientOptions CosmosClientOptions { get; } = new CosmosClientOptions();
+    public CosmosClientOptions CosmosClientOptions { get; } = new();
+    public CosmosEventStorePartitionStrategy PartitionStrategy { get; set; } = new();
 
     public string? AccountEndpoint { get; set; }
     public string? AuthKeyOrTokenResource { get; set; }

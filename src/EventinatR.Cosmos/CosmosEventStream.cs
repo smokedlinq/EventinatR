@@ -8,12 +8,12 @@ internal class CosmosEventStream : EventStream
     private readonly PartitionKey _partitionKey;
     private readonly JsonSerializerOptions _serializerOptions;
 
-    public CosmosEventStream(Container container, EventStreamId id, JsonSerializerOptions serializerOptions)
+    public CosmosEventStream(Container container, PartitionKey partitionKey, EventStreamId id, JsonSerializerOptions serializerOptions)
         : base(id)
     {
         _container = container ?? throw new ArgumentNullException(nameof(container));
+        _partitionKey = partitionKey;
         _serializerOptions = serializerOptions ?? throw new ArgumentNullException(nameof(serializerOptions));
-        _partitionKey = new PartitionKey(Id.Value);
     }
 
     internal virtual async IAsyncEnumerable<Event> ReadFromVersionAsync(long version, [EnumeratorCancellation] CancellationToken cancellationToken = default)

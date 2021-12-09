@@ -30,7 +30,7 @@ public class CosmosEventStore : EventStore, IAsyncDisposable
     public override async Task<EventStream> GetStreamAsync(EventStreamId id, CancellationToken cancellationToken = default)
     {
         var container = await _container.ConfigureAwait(false);
-        return new CosmosEventStream(container, id, Options.SerializerOptions);
+        return new CosmosEventStream(container, Options.PartitionStrategy.GetPartitionKey(id), id, Options.SerializerOptions);
     }
 
     public async ValueTask DisposeAsync()
