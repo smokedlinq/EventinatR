@@ -27,4 +27,7 @@ public record JsonData(JsonDataType Type, [property: JsonConverter(typeof(Binary
 
     public T? As<T>(JsonSerializerOptions? serializerOptions = null)
         => JsonDataDeserializer<T>.Deserialize(Type, Value, serializerOptions ?? DefaultSerializerOptions);
+
+    public T As<T>(T defaultValue, JsonSerializerOptions? serializerOptions = null)
+        => JsonDataDeserializer<T>.Deserialize(Type, Value, serializerOptions ?? DefaultSerializerOptions) ?? defaultValue;
 }

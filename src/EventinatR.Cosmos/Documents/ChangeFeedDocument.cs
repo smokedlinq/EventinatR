@@ -6,6 +6,7 @@ internal record ChangeFeedDocument(
     long Version,
     string Type,
     DateTimeOffset Timestamp,
+    JsonData? Transaction,
     JsonData? Data,
     JsonData? State)
 {
@@ -19,7 +20,7 @@ internal record ChangeFeedDocument(
         => string.Equals(Type, DocumentTypes.Stream, StringComparison.OrdinalIgnoreCase);
 
     public EventDocument ToEventDocument()
-        => IsEvent ? new EventDocument(Stream, Id, Version, Timestamp, Data!) : throw new InvalidOperationException("The document is not an event.");
+        => IsEvent ? new EventDocument(Stream, Id, Version, Transaction!, Timestamp, Data!) : throw new InvalidOperationException("The document is not an event.");
 
     public SnapshotDocument ToSnapshotDocument()
         => IsSnapshot ? new SnapshotDocument(Stream, Id, Version, State!) : throw new InvalidOperationException("The document is not a snapshot.");

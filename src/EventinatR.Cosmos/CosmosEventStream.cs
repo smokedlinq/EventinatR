@@ -133,12 +133,19 @@ internal class CosmosEventStream : EventStream
                 EnableContentResponseOnWrite = false
             };
 
+            if (!collection.TryGetNonEnumeratedCount(out var count))
+            {
+                count = collection.Count();
+            }
+
+            var transaction = JsonData.From(new EventStreamTransaction(version + count, count));
+
             foreach (var item in collection)
             {
                 version++;
                 var id = $"{Id.Value}:{version}";
                 var data = JsonData.From(item, _serializerOptions);
-                var eventResource = new EventDocument(Id.Value, id, version, DateTimeOffset.Now, data);
+                var eventResource = new EventDocument(Id.Value, id, version, transaction, DateTimeOffset.Now, data);
                 batch.CreateItem(eventResource, options);
             }
 

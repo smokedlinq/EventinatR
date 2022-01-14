@@ -55,11 +55,18 @@ internal class InMemoryEventStream : EventStream, IDisposable
             // Lock to prevent race condition on event version
             await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
+            if (!collection.TryGetNonEnumeratedCount(out var count))
+            {
+                count = collection.Count();
+            }
+
+            var transaction = new EventStreamTransaction(_events.Count + count, count);
+
             try
             {
                 foreach (var data in collection)
                 {
-                    var @event = new Event(Id, _events.Count + 1, DateTimeOffset.Now, JsonData.From(data));
+                    var @event = new Event(Id, _events.Count + 1, transaction, DateTimeOffset.Now, JsonData.From(data));
                     _events.Add(@event);
                 }
 
