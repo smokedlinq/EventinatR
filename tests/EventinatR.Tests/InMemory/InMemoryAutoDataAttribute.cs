@@ -6,7 +6,7 @@ public record TestEvent(int Value);
 public record class TestEventCollectionWithNull(IEnumerable<TestEvent> Events);
 public record TestState(int State);
 
-internal class InMemoryAutoDataAttribute : MoqDataAttribute
+internal class InMemoryAutoDataAttribute : FixturesAttribute
 {
     public InMemoryAutoDataAttribute()
         : base(Customize)

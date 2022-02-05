@@ -1,6 +1,5 @@
 using ExRam.Gremlinq.Core;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace EventinatR.Projections.Graph.Cosmos;
 

@@ -4,44 +4,43 @@ using BenchmarkDotNet.Attributes;
 using EventinatR.Cosmos;
 using EventinatR.Cosmos.Documents;
 
-namespace EventinatR.Benchmarks.Cosmos
+namespace EventinatR.Benchmarks.Cosmos;
+
+public class ChangeFeedBenchmarks
 {
-    public class ChangeFeedBenchmarks
+    private record Data(string String, int Int32, long Int64, bool Boolean, Guid Guid);
+
+    private string _documents = string.Empty;
+
+    [Params(1, 10, 100)]
+    public int Count { get; set; }
+
+    [GlobalSetup]
+    public void Setup()
     {
-        private record Data(string String, int Int32, long Int64, bool Boolean, Guid Guid);
+        var fixture = new Fixture();
 
-        private string _documents = string.Empty;
+        fixture.Register(() => JsonData.From(fixture.Create<Data>()));
 
-        [Params(1, 10, 100)]
-        public int Count { get; set; }
-
-        [GlobalSetup]
-        public void Setup()
+        var documents = fixture.CreateMany<EventDocument>(Count);
+        var serializerOptions = new JsonSerializerOptions
         {
-            var fixture = new Fixture();
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
 
-            fixture.Register(() => JsonData.From(fixture.Create<Data>()));
+        _documents = JsonSerializer.Serialize(documents, serializerOptions);
+    }
 
-            var documents = fixture.CreateMany<EventDocument>(Count);
-            var serializerOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            };
+    [Benchmark()]
+    public void ParseEvents()
+    {
+        var events = CosmosEventStoreChangeFeed.ParseEvents(_documents);
 
-            _documents = JsonSerializer.Serialize(documents, serializerOptions);
-        }
-
-        [Benchmark()]
-        public void ParseEvents()
+        foreach (var e in events)
         {
-            var events = CosmosEventStoreChangeFeed.ParseEvents(_documents);
-
-            foreach (var e in events)
-            {
-                _ = e.Data.As<Data>();
-            }
+            _ = e.Data.As<Data>();
         }
     }
 }

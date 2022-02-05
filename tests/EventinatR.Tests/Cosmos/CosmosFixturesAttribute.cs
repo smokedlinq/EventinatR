@@ -1,13 +1,11 @@
-using EventinatR.Cosmos;
-
 namespace EventinatR.Tests.Cosmos;
 
 public record TestEvent(int Value);
 public record TestState(int State);
 
-internal class CosmosAutoDataAttribute : MoqDataAttribute
+internal class CosmosFixturesAttribute : FixturesAttribute
 {
-    public CosmosAutoDataAttribute()
+    public CosmosFixturesAttribute()
         : base(Customize)
     {
     }

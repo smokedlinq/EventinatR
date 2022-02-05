@@ -13,7 +13,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventinatR.DependencyInject
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventinatR.Benchmarks", "tests\EventinatR.Benchmarks\EventinatR.Benchmarks.csproj", "{8EC6406A-B97F-4FCE-9112-CFBF7E5565B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventinatR.Projections.Graph.Cosmos", "src\EventinatR.Projections.Graph.Cosmos\EventinatR.Projections.Graph.Cosmos.csproj", "{BB778DF2-2588-4688-AA7F-18476E636564}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventinatR.Projections.Graph.Cosmos", "src\EventinatR.Projections.Graph.Cosmos\EventinatR.Projections.Graph.Cosmos.csproj", "{BB778DF2-2588-4688-AA7F-18476E636564}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventinatR.Publishers.ServiceBus", "src\EventinatR.Cosmos.Publishers.ServiceBus\EventinatR.Publishers.ServiceBus.csproj", "{FB8EC46A-DD69-4309-A000-002767187FBA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventinatR.Publishers.EventGrid", "src\EventinatR.Cosmos.Publishers.EventGrid\EventinatR.Publishers.EventGrid.csproj", "{72A8BE95-4F55-49ED-AC92-52C0F66FD612}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +49,14 @@ Global
 		{BB778DF2-2588-4688-AA7F-18476E636564}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB778DF2-2588-4688-AA7F-18476E636564}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB778DF2-2588-4688-AA7F-18476E636564}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB8EC46A-DD69-4309-A000-002767187FBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB8EC46A-DD69-4309-A000-002767187FBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB8EC46A-DD69-4309-A000-002767187FBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB8EC46A-DD69-4309-A000-002767187FBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72A8BE95-4F55-49ED-AC92-52C0F66FD612}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72A8BE95-4F55-49ED-AC92-52C0F66FD612}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72A8BE95-4F55-49ED-AC92-52C0F66FD612}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72A8BE95-4F55-49ED-AC92-52C0F66FD612}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

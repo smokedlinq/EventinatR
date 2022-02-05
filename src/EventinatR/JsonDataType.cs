@@ -19,7 +19,7 @@ public record JsonDataType(string Name, string? Assembly = null)
         return new JsonDataType(type.FullName ?? type.Name, type.Assembly.GetName().FullName);
     }
 
-    public bool TryToType([MaybeNullWhen(false)]out Type type)
+    public bool TryToType([MaybeNullWhen(false)] out Type type)
     {
         type = Type.GetType(Name, false, true);
 
