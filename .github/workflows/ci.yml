@@ -2,44 +2,51 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ main ]
+    branches:
+    - main
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches:
+    - main
 
-env:
-  DOTNET_NOLOGO: true
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 
 defaults:
   run:
     shell: pwsh
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
+
+    - uses: ./.github/actions/build
+  
+    - run: dotnet test --configuration Release --logger 'console;verbosity=detailed' /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+
+    - uses: snyk/actions/dotnet@master
+      continue-on-error: true
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        fetch-depth: 0
+        args: >-
+          --all-projects
+          --detection-depth=8
+          --severity-threshold=high
+          --sarif-file-output=snyk.sarif
+        command: test
 
-    - name: Setup .NET 6.0.x
-      uses: actions/setup-dotnet@v1
+    - uses: github/codeql-action/upload-sarif@v1
       with:
-        dotnet-version: 6.0.x
-        include-prerelease: True
-
-    - name: Build
-      run: dotnet build --configuration Release --no-incremental
-
-    - name: Unit tests
-      run: dotnet test --configuration Release --logger 'console;verbosity=detailed' /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
-
-    - name: Benchmark tests
-      run: dotnet run --configuration Release --project ./tests/EventinatR.Benchmarks/EventinatR.Benchmarks.csproj
-
-    - name: Upload benchmark artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: BenchmarkDotNet.Artifacts
-        path: ./BenchmarkDotNet.Artifacts/
+        sarif_file: snyk.sarif
