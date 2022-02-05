@@ -29,8 +29,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\EventinatR.Cosmos.Publishers.EventGrid\EventinatR.Publishers.EventGrid.csproj" />
-    <ProjectReference Include="..\..\src\EventinatR.Cosmos.Publishers.ServiceBus\EventinatR.Publishers.ServiceBus.csproj" />
+    <ProjectReference Include="..\..\src\EventinatR.Publishers.EventGrid\EventinatR.Publishers.EventGrid.csproj" />
+    <ProjectReference Include="..\..\src\EventinatR.Publishers.ServiceBus\EventinatR.Publishers.ServiceBus.csproj" />
     <ProjectReference Include="..\..\src\EventinatR.Cosmos\EventinatR.Cosmos.csproj" />
     <ProjectReference Include="..\..\src\EventinatR.DependencyInjection\EventinatR.DependencyInjection.csproj" />
     <ProjectReference Include="..\..\src\EventinatR.Projections.Graph.Cosmos\EventinatR.Projections.Graph.Cosmos.csproj" />
