@@ -62,7 +62,7 @@ internal static class JsonDataDeserializer<T>
             return (data, options) => From<ReadOnlyMemory<byte>>(data.ToMemory());
         }
 
-        if (options.TypeAliases.TryGetValue(type.Name, out var actualType) || type.TryToType(out actualType))
+        if (options.Types.TryGetValue(type.Name, out var actualType) || type.TryToType(out actualType))
         {
             return (data, options) =>
             {

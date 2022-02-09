@@ -21,5 +21,5 @@ public class JsonDataOptions
 
     public JsonSerializerOptions SerializerOptions { get; }
 
-    public Dictionary<string, Type> TypeAliases { get; } = new(StringComparer.OrdinalIgnoreCase);
+    public Dictionary<string, Type> Types { get; } = new(StringComparer.OrdinalIgnoreCase);
 }
