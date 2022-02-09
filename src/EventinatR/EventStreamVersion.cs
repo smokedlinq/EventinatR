@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
 using EventinatR.Serialization;
 
@@ -7,6 +8,9 @@ namespace EventinatR;
 public record EventStreamVersion(long Value)
 {
     public static readonly EventStreamVersion None = new(0L);
+
+    public override string ToString()
+        => Value.ToString("D0", CultureInfo.CurrentCulture);
 
     public static implicit operator EventStreamVersion(int value)
         => new((long)value);
