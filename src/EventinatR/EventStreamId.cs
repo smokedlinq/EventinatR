@@ -1,8 +1,11 @@
 using System.Globalization;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using EventinatR.Serialization;
 
 namespace EventinatR;
 
+[JsonConverter(typeof(EventStreamIdJsonConverter))]
 public record EventStreamId(string Value)
 {
     public static readonly EventStreamId None = new(string.Empty);

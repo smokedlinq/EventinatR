@@ -1,12 +1,43 @@
+using System.Text.Json.Serialization;
+using EventinatR.Serialization;
+
 namespace EventinatR;
 
+[JsonConverter(typeof(EventStreamVersionJsonConverter))]
 public record EventStreamVersion(long Value)
 {
-    public static readonly EventStreamVersion None = new(default);
+    public static readonly EventStreamVersion None = new(0L);
 
     public static implicit operator EventStreamVersion(int value)
-        => new(value);
+        => new((long)value);
 
     public static implicit operator EventStreamVersion(long value)
         => new(value);
+
+    public static implicit operator long(EventStreamVersion value)
+        => value.Value;
+
+    public static EventStreamVersion operator +(EventStreamVersion x, EventStreamVersion y)
+        => x.Value + y.Value;
+
+    public static EventStreamVersion operator -(EventStreamVersion x, EventStreamVersion y)
+        => x.Value - y.Value;
+
+    public static EventStreamVersion operator ++(EventStreamVersion x)
+        => x.Value + 1;
+
+    public static EventStreamVersion operator --(EventStreamVersion x)
+        => x.Value + 1;
+
+    public static bool operator <(EventStreamVersion x, EventStreamVersion y)
+        => x.Value < y.Value;
+
+    public static bool operator <=(EventStreamVersion x, EventStreamVersion y)
+        => x.Value <= y.Value;
+
+    public static bool operator >(EventStreamVersion x, EventStreamVersion y)
+        => x.Value > y.Value;
+
+    public static bool operator >=(EventStreamVersion x, EventStreamVersion y)
+        => x.Value >= y.Value;
 }

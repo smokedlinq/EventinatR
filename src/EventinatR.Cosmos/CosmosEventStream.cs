@@ -86,7 +86,7 @@ internal class CosmosEventStream : EventStream
 
         return snapshot is null
             ? new CosmosEventStreamSnapshot<T>(this)
-            : new CosmosEventStreamSnapshot<T>(this, new EventStreamVersion(snapshot.Resource.Version), snapshot.Resource.State.As<T>());
+            : new CosmosEventStreamSnapshot<T>(this, snapshot.Resource.Version, snapshot.Resource.State.As<T>());
     }
 
     public override Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken = default)
@@ -121,11 +121,11 @@ internal class CosmosEventStream : EventStream
         {
             var stream = await GetCosmosEventStreamResourceAsync(cancellationToken).ConfigureAwait(false);
             var batch = _container.CreateTransactionalBatch(_partitionKey);
-            var version = stream?.Resource?.Version ?? default;
+            var version = stream?.Resource?.Version ?? EventStreamVersion.None;
 
             if (!collection.Any())
             {
-                return new EventStreamVersion(version);
+                return version;
             }
 
             var options = new TransactionalBatchItemRequestOptions

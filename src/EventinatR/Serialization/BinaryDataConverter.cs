@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace EventinatR;
+namespace EventinatR.Serialization;
 
 internal class BinaryDataConverter : JsonConverter<BinaryData>
 {

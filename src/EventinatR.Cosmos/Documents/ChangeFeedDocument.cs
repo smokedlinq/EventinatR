@@ -1,9 +1,9 @@
 namespace EventinatR.Cosmos.Documents;
 
 internal record ChangeFeedDocument(
-    string Stream,
-    string Id,
-    long Version,
+    EventStreamId Stream,
+    EventStreamId Id,
+    EventStreamVersion Version,
     string Type,
     DateTimeOffset Timestamp,
     EventStreamTransaction Transaction,

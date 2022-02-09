@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using EventinatR.Serialization;
 
 namespace EventinatR.Tests;
 

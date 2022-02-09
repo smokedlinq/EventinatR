@@ -1,14 +1,14 @@
 namespace EventinatR.Cosmos.Documents;
 
 internal record EventDocument(
-    string Stream,
-    string Id,
-    long Version,
+    EventStreamId Stream,
+    EventStreamId Id,
+    EventStreamVersion Version,
     EventStreamTransaction Transaction,
     DateTimeOffset Timestamp,
     JsonData Data)
     : Document(Stream, Id, Version, DocumentTypes.Event)
 {
     public Event ToEvent()
-        => new(new EventStreamId(Stream), Version, Transaction, Timestamp, Data);
+        => new(Stream, Version, Transaction, Timestamp, Data);
 }
