@@ -21,11 +21,16 @@ public record JsonDataType(string Name, string? Assembly = null)
 
     public bool TryToType([MaybeNullWhen(false)] out Type type)
     {
-        type = Type.GetType(Name, false, true);
+        type = null;
 
-        if (type is null && !string.IsNullOrEmpty(Assembly))
+        if (!string.IsNullOrEmpty(Assembly))
         {
             type = Type.GetType($"{Name}, {Assembly}", false, true);
+        }
+
+        if (type is null)
+        {
+            type = Type.GetType(Name, false, true);
         }
 
         return type is not null;

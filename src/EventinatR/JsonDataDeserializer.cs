@@ -7,28 +7,28 @@ internal static class JsonDataDeserializer<T>
     private delegate T? JsonDataConverter(BinaryData data, JsonSerializerOptions options);
     private static readonly ConcurrentDictionary<JsonDataType, JsonDataConverter> Types = new();
 
-    public static T? Deserialize(JsonDataType type, BinaryData data, JsonSerializerOptions options)
+    public static T? Deserialize(JsonDataType type, BinaryData data, JsonDataOptions options)
     {
         if (typeof(T) == typeof(JsonDocument))
         {
-            return FromJsonDocument(data, options);
+            return FromJsonDocument(data, options.SerializerOptions);
         }
 
         if (typeof(T) == typeof(JsonElement))
         {
-            return FromJsonElement(data, options);
+            return FromJsonElement(data, options.SerializerOptions);
         }
 
         if (!Types.TryGetValue(type, out var func))
         {
-            func = Create(type);
+            func = Create(type, options);
             Types.TryAdd(type, func);
         }
 
-        return func(data, options);
+        return func(data, options.SerializerOptions);
     }
 
-    private static JsonDataConverter Create(JsonDataType type)
+    private static JsonDataConverter Create(JsonDataType type, JsonDataOptions options)
     {
         var desiredType = JsonDataType.For(typeof(T));
 
@@ -62,7 +62,7 @@ internal static class JsonDataDeserializer<T>
             return (data, options) => From<ReadOnlyMemory<byte>>(data.ToMemory());
         }
 
-        if (type.TryToType(out var actualType))
+        if (options.TypeAliases.TryGetValue(type.Name, out var actualType) || type.TryToType(out actualType))
         {
             return (data, options) =>
             {
