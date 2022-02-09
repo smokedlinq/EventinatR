@@ -138,7 +138,7 @@ internal class CosmosEventStream : EventStream
                 count = collection.Count();
             }
 
-            var transaction = JsonData.From(new EventStreamTransaction(version + count, count));
+            var transaction = new EventStreamTransaction(version + count, count);
 
             foreach (var item in collection)
             {
