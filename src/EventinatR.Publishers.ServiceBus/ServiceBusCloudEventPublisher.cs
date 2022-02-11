@@ -48,22 +48,28 @@ public class ServiceBusCloudEventPublisher
         await _sender.SendMessagesAsync(batch, cancellationToken).ConfigureAwait(false);
     }
 
-    protected virtual bool ShouldPublish(Event @event)
+    protected virtual bool ShouldPublish(Event e)
         => true;
 
-    protected virtual BinaryData Convert(Event @event)
+    protected virtual BinaryData Convert(Event e)
     {
-        var cloudEvent = new CloudEvent(_source, @event.Data.Type.Name, @event.Data.Value, MediaTypeNames.Application.Json, CloudEventDataFormat.Json)
+        var cloudEvent = ConvertToCloudEvent(e);
+        return BinaryData.FromObjectAsJson(new[] { cloudEvent }, DefaultSerializerOptions);
+    }
+
+    protected virtual CloudEvent ConvertToCloudEvent(Event e)
+    { 
+        var cloudEvent = new CloudEvent(_source, e.Data.Type.Name, e.Data.Value, MediaTypeNames.Application.Json, CloudEventDataFormat.Json)
         {
-            Subject = @event.StreamId.Value,
-            Time = @event.Timestamp
+            Subject = e.StreamId.Value,
+            Time = e.Timestamp
         };
 
-        cloudEvent.ExtensionAttributes.Add("partitionkey", @event.StreamId.Value);
-        cloudEvent.ExtensionAttributes.Add("sequence", @event.Version.Value.ToString(CultureInfo.InvariantCulture));
+        cloudEvent.ExtensionAttributes.Add("partitionkey", e.StreamId.Value);
+        cloudEvent.ExtensionAttributes.Add("sequence", e.Version.Value.ToString(CultureInfo.InvariantCulture));
         cloudEvent.ExtensionAttributes.Add("sequencetype", "Integer");
-        cloudEvent.ExtensionAttributes.Add("transaction", @event.Transaction.Version.Value.ToString(CultureInfo.InvariantCulture));
+        cloudEvent.ExtensionAttributes.Add("transaction", e.Transaction.Version.Value.ToString(CultureInfo.InvariantCulture));
 
-        return BinaryData.FromObjectAsJson(new[] { cloudEvent }, DefaultSerializerOptions);
+        return cloudEvent;
     }
 }

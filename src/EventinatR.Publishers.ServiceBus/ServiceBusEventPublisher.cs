@@ -35,9 +35,9 @@ public class ServiceBusEventPublisher
         await _sender.SendMessagesAsync(batch, cancellationToken).ConfigureAwait(false);
     }
 
-    protected virtual bool ShouldPublish(Event @event)
+    protected virtual bool ShouldPublish(Event e)
         => true;
 
-    protected virtual BinaryData Convert(Event @event)
-        => BinaryData.FromObjectAsJson(@event);
+    protected virtual BinaryData Convert(Event e)
+        => BinaryData.FromObjectAsJson(e);
 }
