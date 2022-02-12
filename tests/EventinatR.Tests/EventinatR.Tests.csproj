@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\EventinatR.Publishers.EventGrid\EventinatR.Publishers.EventGrid.csproj" />
+    <ProjectReference Include="..\..\src\EventinatR.Publishers.Queues\EventinatR.Publishers.Queues.csproj" />
     <ProjectReference Include="..\..\src\EventinatR.Publishers.ServiceBus\EventinatR.Publishers.ServiceBus.csproj" />
     <ProjectReference Include="..\..\src\EventinatR.Cosmos\EventinatR.Cosmos.csproj" />
     <ProjectReference Include="..\..\src\EventinatR.DependencyInjection\EventinatR.DependencyInjection.csproj" />

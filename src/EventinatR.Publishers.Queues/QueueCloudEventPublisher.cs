@@ -1,11 +1,11 @@
 using System.Globalization;
 using System.Net.Mime;
 using Azure.Messaging;
-using Azure.Messaging.ServiceBus;
+using Azure.Storage.Queues;
 
-namespace EventinatR.Publishers.ServiceBus;
+namespace EventinatR.Publishers.Queues;
 
-public class ServiceBusCloudEventPublisher : ServiceBusEventPublisher
+public class QueueCloudEventPublisher : QueueEventPublisher
 {
     private static readonly JsonSerializerOptions DefaultSerializerOptions = new()
     {
@@ -15,8 +15,8 @@ public class ServiceBusCloudEventPublisher : ServiceBusEventPublisher
 
     private readonly string _source;
 
-    public ServiceBusCloudEventPublisher(ServiceBusSender sender, string source)
-        : base(sender)
+    public QueueCloudEventPublisher(QueueClient queue, string source)
+        : base(queue)
         => _source = source ?? throw new ArgumentNullException(nameof(source));
 
     protected override BinaryData Convert(Event e)
@@ -26,7 +26,7 @@ public class ServiceBusCloudEventPublisher : ServiceBusEventPublisher
     }
 
     protected virtual CloudEvent ConvertToCloudEvent(Event e)
-    { 
+    {
         var cloudEvent = new CloudEvent(_source, e.Data.Type.Name, e.Data.Value, MediaTypeNames.Application.Json, CloudEventDataFormat.Json)
         {
             Subject = e.StreamId.Value,
