@@ -13,14 +13,11 @@ public class QueueEventPublisher
     {
         foreach (var e in events)
         {
-            if (!ShouldPublish(e))
+            if (ShouldPublish(e))
             {
-                continue;
+                var message = Convert(e);
+                await SendMessageAsync(message, cancellationToken).ConfigureAwait(false);
             }
-            
-            var message = Convert(e);
-
-            await SendMessageAsync(message, cancellationToken).ConfigureAwait(false);
         }
     }
 

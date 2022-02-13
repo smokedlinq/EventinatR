@@ -4,12 +4,19 @@ namespace EventinatR.Tests.InMemory;
 
 public class InMemoryEventStoreTests
 {
-    [Theory]
-    [InMemoryAutoData]
-    public async Task WhenStreamAlreadyExistsGetStreamAsyncReturnsTheStream(InMemoryEventStore store)
+    private readonly InMemoryEventStore _sut;
+
+    public InMemoryEventStoreTests()
     {
-        var stream1 = await store.GetStreamAsync("id");
-        var stream2 = await store.GetStreamAsync("id");
+        _sut = new InMemoryEventStore();
+    }
+
+    [Fact]
+    public async Task GetStreamAsync_ShouldReturnTheSameStream_WhenStreamAlreadyExists()
+    {
+        var stream1 = await _sut.GetStreamAsync("id");
+
+        var stream2 = await _sut.GetStreamAsync("id");
 
         stream2.Should().Be(stream1);
     }

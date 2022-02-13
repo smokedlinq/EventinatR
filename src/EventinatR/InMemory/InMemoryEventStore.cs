@@ -8,23 +8,7 @@ public class InMemoryEventStore : EventStore
 
     public override Task<EventStream> GetStreamAsync(EventStreamId id, CancellationToken cancellationToken = default)
     {
-        EventStream? stream;
-
-        if (!_streams.ContainsKey(id))
-        {
-            stream = new InMemoryEventStream(id);
-
-            if (_streams.TryAdd(id, stream))
-            {
-                return Task.FromResult(stream);
-            }
-        }
-
-        if (_streams.TryGetValue(id, out stream))
-        {
-            return Task.FromResult(stream);
-        }
-
-        throw new InvalidOperationException("Stream does not exist and could not create it.");
+        var stream = _streams.GetOrAdd(id, _ => new InMemoryEventStream(id));
+        return Task.FromResult(stream);
     }
 }

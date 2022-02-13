@@ -22,16 +22,16 @@ public record EventStreamVersion(long Value)
         => value.Value;
 
     public static EventStreamVersion operator +(EventStreamVersion x, EventStreamVersion y)
-        => x.Value + y.Value;
+        => new(x.Value + y.Value);
 
     public static EventStreamVersion operator -(EventStreamVersion x, EventStreamVersion y)
-        => x.Value - y.Value;
+        => new(x.Value - y.Value);
 
     public static EventStreamVersion operator ++(EventStreamVersion x)
-        => x.Value + 1;
+        => new(x.Value + 1);
 
     public static EventStreamVersion operator --(EventStreamVersion x)
-        => x.Value + 1;
+        => new(x.Value - 1);
 
     public static bool operator <(EventStreamVersion x, EventStreamVersion y)
         => x.Value < y.Value;

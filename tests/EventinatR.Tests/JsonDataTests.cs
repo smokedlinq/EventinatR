@@ -7,6 +7,14 @@ public class JsonDataTests
     public record LooksLikeTestEvent(int Value);
     public record NotATestThatIsConvertable;
 
+    private readonly TestEvent _value;
+    private readonly Fixture _fixture = new();
+
+    public JsonDataTests()
+    {
+        _value = _fixture.Create<TestEvent>();
+    }
+
     [Fact]
     public void CanConvertFromObject()
     {
@@ -17,41 +25,37 @@ public class JsonDataTests
         data.Value.ToString().Should().Be(@"{""value"":1}");
     }
 
-    [Theory]
-    [Fixtures]
-    public void CanConvertToObject(TestEvent value)
+    [Fact]
+    public void CanConvertToObject()
     {
-        var data = JsonData.From(value);
+        var data = JsonData.From(_value);
         var obj = data.As<TestEvent>();
 
-        obj.Should().Be(value);
+        obj.Should().Be(_value);
     }
 
-    [Theory]
-    [Fixtures]
-    public void CannotConvertToObjectWhenTargetTypeIsNotFound(TestEvent value)
+    [Fact]
+    public void CannotConvertToObjectWhenTargetTypeIsNotFound()
     {
-        var data = JsonData.From(value);
+        var data = JsonData.From(_value);
         var obj = data.As<NotATestThatIsConvertable>();
 
         obj.Should().BeNull();
     }
 
-    [Theory]
-    [Fixtures]
-    public void CanConvertToObjectWithBaseTarget(TestEvent value)
+    [Fact]
+    public void CanConvertToObjectWithBaseTarget()
     {
-        var data = JsonData.From(value);
+        var data = JsonData.From(_value);
         var obj = data.As<BaseEvent>();
 
         obj.Should().NotBeNull();
     }
 
-    [Theory]
-    [Fixtures]
-    public void CanConvertToObjectThatLooksTheSameWhenTypeNotFound(TestEvent value)
+    [Fact]
+    public void CanConvertToObjectThatLooksTheSameWhenTypeNotFound()
     {
-        var data = JsonData.From(value);
+        var data = JsonData.From(_value);
         data = data with
         {
             Type = new JsonDataType("NotAType", "NotAnAssembly")
@@ -61,73 +65,66 @@ public class JsonDataTests
         obj.Should().NotBeNull();
     }
 
-    [Theory]
-    [Fixtures]
-    public void CanConvertToJsonDocument(TestEvent value)
+    [Fact]
+    public void CanConvertToJsonDocument()
     {
-        var data = JsonData.From(value);
+        var data = JsonData.From(_value);
         var doc = data.As<JsonDocument>();
 
         doc.Should().NotBeNull();
     }
 
-    [Theory]
-    [Fixtures]
-    public void CanConvertToJsonElement(TestEvent value)
+    [Fact]
+    public void CanConvertToJsonElement()
     {
-        var data = JsonData.From(value);
+        var data = JsonData.From(_value);
         var element = data.As<JsonElement>();
 
         element.Should().NotBeNull();
     }
 
-    [Theory]
-    [Fixtures]
-    public void CanConvertToBinaryData(TestEvent value)
+    [Fact]
+    public void CanConvertToBinaryData()
     {
-        var data = JsonData.From(value);
+        var data = JsonData.From(_value);
         var obj = data.As<BinaryData>();
 
         obj.Should().NotBeNull();
     }
 
-    [Theory]
-    [Fixtures]
-    public void CanConvertToString(TestEvent value)
+    [Fact]
+    public void CanConvertToString()
     {
-        var data = JsonData.From(value);
+        var data = JsonData.From(_value);
         var obj = data.As<string>();
 
         obj.Should().NotBeNull();
     }
 
-    [Theory]
-    [Fixtures]
-    public void CanConvertToByteArray(TestEvent value)
+    [Fact]
+    public void CanConvertToByteArray()
     {
-        var data = JsonData.From(value);
+        var data = JsonData.From(_value);
         var array = data.As<byte[]>();
 
         array.Should().NotBeNull();
         array!.Length.Should().BeGreaterThan(0);
     }
 
-    [Theory]
-    [Fixtures]
-    public void CanConvertToReadOnlyMemoryOfByte(TestEvent value)
+    [Fact]
+    public void CanConvertToReadOnlyMemoryOfByte()
     {
-        var data = JsonData.From(value);
+        var data = JsonData.From(_value);
         var memory = data.As<ReadOnlyMemory<byte>>();
 
         memory.Should().NotBeNull();
         memory!.Length.Should().BeGreaterThan(0);
     }
 
-    [Theory]
-    [Fixtures]
-    public void CanConvertToStream(TestEvent value)
+    [Fact]
+    public void CanConvertToStream()
     {
-        var data = JsonData.From(value);
+        var data = JsonData.From(_value);
         var stream = data.As<Stream>();
 
         stream.Should().NotBeNull();

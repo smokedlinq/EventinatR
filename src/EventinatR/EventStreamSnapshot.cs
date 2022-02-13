@@ -4,7 +4,12 @@ public abstract class EventStreamSnapshot<T>
 {
     public EventStreamSnapshot(EventStreamId streamId, EventStreamVersion? version = null, T? state = default)
     {
-        StreamId = streamId ?? throw new ArgumentNullException(nameof(streamId));
+        if (streamId == EventStreamId.None)
+        {
+            throw new ArgumentException("The value cannot be None.", nameof(streamId));
+        }
+
+        StreamId = streamId;
         Version = version ?? EventStreamVersion.None;
         State = state;
     }

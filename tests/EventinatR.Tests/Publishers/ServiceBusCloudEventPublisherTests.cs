@@ -6,47 +6,30 @@ namespace EventinatR.Tests.Publishers;
 
 public class ServiceBusCloudEventPublisherTests
 {
-    [Theory]
-    [Fixtures]
-    public async Task PublishAsync(Event[] events)
+    private readonly ServiceBusCloudEventPublisher _sut;
+    private readonly ServiceBusSender _sender = Substitute.For<ServiceBusSender>();
+    private readonly Fixture _fixture = new();
+
+    public ServiceBusCloudEventPublisherTests()
     {
-        var sender = Substitute.For<ServiceBusSender>();
-        var batchMessageStore = new List<ServiceBusMessage>();
-        var batch = ServiceBusModelFactory.ServiceBusMessageBatch(long.MaxValue, batchMessageStore);
-
-        sender.CreateMessageBatchAsync(Arg.Any<CancellationToken>()).Returns(batch);
-
-        sender.SendMessagesAsync(Arg.Any<ServiceBusMessageBatch>(), Arg.Any<CancellationToken>())
-            .Returns(Task.CompletedTask);
-
-        var sut = new ServiceBusCloudEventPublisher(sender, "/local");
-
-        await sut.PublishAsync(events);
-
-        await sender.Received().SendMessagesAsync(Arg.Any<ServiceBusMessageBatch>(), Arg.Any<CancellationToken>());
-
-        batchMessageStore.Count.Should().Be(events.Length);
+        _sut = new ServiceBusCloudEventPublisher(_sender, "/");
     }
 
-    [Theory]
-    [Fixtures]
-    public async Task MessageBodyJson_ShouldParsableByCloudEvent(Event[] events)
+    [Fact]
+    public async Task PublishAsync_ShouldProduceCloudEventJson_WhenMessageIsSerialized()
     {
-        var sender = Substitute.For<ServiceBusSender>();
+        var events = _fixture.Build<Event>()
+            .With(x => x.Data, JsonData.From(new { }))
+            .CreateMany(1);
+
         var batchMessageStore = new List<ServiceBusMessage>();
         var batch = ServiceBusModelFactory.ServiceBusMessageBatch(long.MaxValue, batchMessageStore);
 
-        sender.CreateMessageBatchAsync(Arg.Any<CancellationToken>()).Returns(batch);
+        _sender.CreateMessageBatchAsync(Arg.Any<CancellationToken>()).Returns(batch);
 
-        sender.SendMessagesAsync(Arg.Any<ServiceBusMessageBatch>(), Arg.Any<CancellationToken>())
-            .Returns(Task.CompletedTask);
-
-        var sut = new ServiceBusCloudEventPublisher(sender, "/local");
-
-        await sut.PublishAsync(events);
+        await _sut.PublishAsync(events);
 
         var message = batchMessageStore.First();
-
         CloudEvent.ParseMany(message.Body).Length.Should().Be(1);
     }
 }

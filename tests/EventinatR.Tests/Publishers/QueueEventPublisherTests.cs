@@ -7,19 +7,28 @@ namespace EventinatR.Tests.Publishers;
 
 public class QueueEventPublisherTests
 {
-    [Theory]
-    [Fixtures]
-    public async Task PublishAsync(Event[] events)
+    private readonly QueueEventPublisher _sut;
+    private readonly QueueClient _queue = Substitute.For<QueueClient>();
+    private readonly Response<SendReceipt> _response = Substitute.For<Azure.Response<SendReceipt>>();
+    private readonly Fixture _fixture = new();
+
+    public QueueEventPublisherTests()
     {
-        var queue = Substitute.For<QueueClient>();
-        var response = Substitute.For<Response<SendReceipt>>();
+        _sut = new QueueEventPublisher(_queue);
+    }
 
-        queue.SendMessageAsync(Arg.Any<BinaryData>()).Returns(response);
+    [Fact]
+    public async Task PublishAsync_ShouldCallClientSendEventsAsync_WhenSingleEventIsProvided()
+    {
+        var events = _fixture.Build<Event>()
+            .With(x => x.Data, JsonData.From(new { }))
+            .CreateMany(1);
 
-        var sut = new QueueEventPublisher(queue);
+        _queue.SendMessageAsync(Arg.Any<BinaryData>())
+            .Returns(_response);
 
-        await sut.PublishAsync(events);
+        await _sut.PublishAsync(events);
 
-        await queue.Received().SendMessageAsync(Arg.Any<BinaryData>());
+        await _queue.Received(1).SendMessageAsync(Arg.Any<BinaryData>());
     }
 }

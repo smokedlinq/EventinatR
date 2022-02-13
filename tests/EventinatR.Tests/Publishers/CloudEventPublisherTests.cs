@@ -1,3 +1,4 @@
+using Azure;
 using Azure.Messaging;
 using Azure.Messaging.EventGrid;
 using EventinatR.Publishers.EventGrid;
@@ -6,20 +7,26 @@ namespace EventinatR.Tests.Publishers;
 
 public class CloudEventPublisherTests
 {
-    [Theory]
-    [Fixtures]
-    public async Task PublishAsync(Event[] events)
+    private readonly CloudEventPublisher _sut;
+    private readonly EventGridPublisherClient _client = Substitute.For<EventGridPublisherClient>();
+    private readonly Response _response = Substitute.For<Azure.Response>();
+    private readonly Fixture _fixture = new();
+
+    public CloudEventPublisherTests()
     {
-        var client = Substitute.For<EventGridPublisherClient>();
-        var response = Substitute.For<Azure.Response>();
+        _sut = new CloudEventPublisher(_client, "/");
+    }
 
-        client.SendEventsAsync(Arg.Any<IEnumerable<CloudEvent>>(), Arg.Any<CancellationToken>())
-            .Returns(response);
+    [Fact]
+    public async Task PublishAsync_ShouldCallClientSendEventsAsync_WhenSingleEventIsProvided()
+    {
+        var events = _fixture.CreateMany<Event>(1);
 
-        var sut = new CloudEventPublisher(client, "http://localhost");
+        _client.SendEventsAsync(Arg.Any<IEnumerable<CloudEvent>>(), Arg.Any<CancellationToken>())
+            .Returns(_response);
 
-        await sut.PublishAsync(events);
+        await _sut.PublishAsync(events);
 
-        await client.Received().SendEventsAsync(Arg.Any<IEnumerable<CloudEvent>>(), Arg.Any<CancellationToken>());
+        await _client.Received(1).SendEventsAsync(Arg.Any<IEnumerable<CloudEvent>>(), Arg.Any<CancellationToken>());
     }
 }

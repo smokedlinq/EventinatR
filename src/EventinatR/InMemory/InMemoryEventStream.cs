@@ -5,13 +5,16 @@ namespace EventinatR.InMemory;
 internal class InMemoryEventStream : EventStream, IDisposable
 {
     private readonly List<Event> _events = new();
-    private readonly ConcurrentDictionary<Type, object> _snapshots = new();
     private readonly SemaphoreSlim _lock = new(1, 1);
+    private readonly InMemoryEventStreamSnapshotStore _snapshots;
 
     public InMemoryEventStream(EventStreamId id)
         : base(id)
     {
+        _snapshots = new InMemoryEventStreamSnapshotStore(this);
     }
+
+    public override EventStreamSnapshotStore Snapshots => _snapshots;
 
     public override Task<EventStreamVersion> GetVersionAsync(CancellationToken cancellationToken = default)
         => Task.FromResult(new EventStreamVersion(_events.Count));
@@ -19,70 +22,28 @@ internal class InMemoryEventStream : EventStream, IDisposable
     public override IAsyncEnumerable<Event> ReadAsync(CancellationToken cancellationToken = default)
         => _events.ToAsyncEnumerable();
 
-    public override Task<EventStreamSnapshot<T>> ReadSnapshotAsync<T>(CancellationToken cancellationToken = default)
+    public override async Task<EventStreamVersion> AppendAsync<TEvent, TState>(IEnumerable<TEvent> events, TState state, CancellationToken cancellationToken = default)
     {
-        var type = typeof(T);
-        var snapshot = _snapshots.ContainsKey(type)
-            ? (EventStreamSnapshot<T>)_snapshots[type]
-            : new InMemoryEventStreamSnapshot<T>(this);
+        // Lock to prevent race condition on event version
+        await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
-        return Task.FromResult(snapshot);
-    }
-
-    public override Task<EventStreamSnapshot<T>> WriteSnapshotAsync<T>(T state, EventStreamVersion version, CancellationToken cancellationToken = default)
-    {
-        _ = state ?? throw new ArgumentNullException(nameof(state));
-
-        var type = typeof(T);
-        var snapshot = new InMemoryEventStreamSnapshot<T>(this, version, state);
-        _snapshots[type] = snapshot;
-        return Task.FromResult<EventStreamSnapshot<T>>(snapshot);
-    }
-
-    public override Task<EventStreamVersion> AppendAsync<TEvent, TState>(IEnumerable<TEvent> collection, TState state, CancellationToken cancellationToken = default)
-    {
-        _ = collection ?? throw new ArgumentNullException(nameof(collection));
-
-        if (collection.Any(x => x is null))
+        try
         {
-            throw new ArgumentException("The collection must not contain a null item.", nameof(collection));
+            return await base.AppendAsync(events, state, cancellationToken).ConfigureAwait(false);
         }
-
-        return AppendAsync();
-
-        async Task<EventStreamVersion> AppendAsync()
+        finally
         {
-            // Lock to prevent race condition on event version
-            await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            _lock.Release();
+        }
+    }
 
-            if (!collection.TryGetNonEnumeratedCount(out var count))
-            {
-                count = collection.Count();
-            }
+    protected override async Task AppendAsync<TState>(TransactionContext context, TState state, CancellationToken cancellationToken = default)
+    {
+        _events.AddRange(context.Events);
 
-            var transaction = new EventStreamTransaction(_events.Count + count, count);
-
-            try
-            {
-                foreach (var data in collection)
-                {
-                    var @event = new Event(Id, _events.Count + 1, transaction, DateTimeOffset.Now, JsonData.From(data));
-                    _events.Add(@event);
-                }
-
-                var version = new EventStreamVersion(_events.Count);
-
-                if (state is not null)
-                {
-                    await WriteSnapshotAsync(state, version, cancellationToken).ConfigureAwait(false);
-                }
-
-                return version;
-            }
-            finally
-            {
-                _lock.Release();
-            }
+        if (state is not null)
+        {
+            await _snapshots.SaveAsync(state, context.Transaction.Version, cancellationToken).ConfigureAwait(false);
         }
     }
 

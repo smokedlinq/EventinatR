@@ -13,6 +13,9 @@ public record EventStreamId(string Value)
     public EventStreamId Concat(EventStreamId id)
         => new($"{Value}:{id.Value}");
 
+    public override string ToString()
+        => Value;
+
     public static implicit operator EventStreamId(string value)
         => new(value);
 
@@ -23,5 +26,5 @@ public record EventStreamId(string Value)
         => ConvertTo(typeof(T));
 
     public static EventStreamId ConvertTo(Type type)
-        => new(Regex.Replace(type.FullName ?? type.Name, "([A-Z])", "-$1", RegexOptions.Compiled).ToLower(CultureInfo.InvariantCulture).TrimStart('-'));
+        => new(Regex.Replace(type.Name, "([A-Z])", "-$1", RegexOptions.Compiled).ToLower(CultureInfo.InvariantCulture).TrimStart('-'));
 }
