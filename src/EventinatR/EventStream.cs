@@ -61,7 +61,7 @@ public abstract class EventStream
         }
 
         var transaction = new EventStreamTransaction(version + count, count);
-        var streamEvents = events.Select(x => new Event(Id, version++, transaction, DateTimeOffset.Now, JsonData.From(x)));
+        var streamEvents = events.Select(x => new Event(Id, ++version, transaction, DateTimeOffset.Now, JsonData.From(x)));
 
         return new(version, transaction, streamEvents);
     }

@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace EventinatR.Serialization;
 
-internal class EventStreamIdJsonConverter : JsonConverter<EventStreamId>
+public class EventStreamIdJsonConverter : JsonConverter<EventStreamId>
 {
     public override EventStreamId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         => reader.GetString() ?? EventStreamId.None;
