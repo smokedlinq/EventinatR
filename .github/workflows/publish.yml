@@ -1,9 +1,8 @@
 name: Publish
 
 on:
-  push:
-    tags:
-    - 'v*'
+  release:
+    types: [ published ]
 
 concurrency:
   group: ${{ github.ref }}
@@ -18,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write
+      contents: read
       packages: write
 
     steps:
@@ -36,15 +35,5 @@ jobs:
     - run: dotnet nuget push "*.nupkg" -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate
       working-directory: ./publish
 
-    - run: dotnet nuget push "*.nupkg" -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --skip-duplicate --no-symbols true --api-key ${{ secrets.GITHUB_TOKEN }}
+    - run: dotnet nuget push "*.nupkg" -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate --no-symbols true
       working-directory: ./publish
-
-    - uses: actions/create-release@master
-      continue-on-error: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: ${{ env.IS_PRERELEASE }}
