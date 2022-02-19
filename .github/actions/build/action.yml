@@ -1,5 +1,10 @@
 name: 'Build'
 description: 'Sets up the environment and builds the solution'
+inputs:
+  skip-tests:
+    description: 'Skip the unit tests'
+    required: false
+    default: 'false'
 runs:
   using: composite
   steps:
@@ -19,3 +24,4 @@ runs:
 
   - run: dotnet test --configuration Release --no-build --logger GitHubActions /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
     shell: pwsh
+    if: ${{ inputs.skip-tests != 'true' }}
