@@ -49,7 +49,7 @@ internal class CosmosEventStream : EventStream
         foreach (var e in context.Events)
         {
             var id = $"{Id.Value}:{e.Version}";
-            var eventResource = new EventDocument(Id.Value, id, e.Version, e.Transaction, e.Timestamp, e.Data);
+            var eventResource = EventDocument.FromEvent(Id.Value, id, e);
             batch.CreateItem(eventResource, options);
         }
 
