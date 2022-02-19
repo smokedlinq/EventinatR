@@ -24,6 +24,9 @@ public class CosmosEventStreamSnapshotStoreTests
     [Fact]
     public async Task GetAsync_ShouldReturnNullState_WhenSnapshotDoesNotExist()
     {
+        _container.ReadItemAsync<StreamDocument>(Arg.Any<string>(), Arg.Any<PartitionKey>())
+               .Returns<Task<ItemResponse<StreamDocument>>>(_ => throw new CosmosException(string.Empty, HttpStatusCode.NotFound, 0, string.Empty, 0));
+
         var snapshot = await _sut.GetAsync<object>();
 
         snapshot.State.Should().BeNull();
