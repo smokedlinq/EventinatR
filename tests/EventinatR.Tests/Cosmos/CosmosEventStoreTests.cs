@@ -5,21 +5,20 @@ namespace EventinatR.Tests.Cosmos;
 public class CosmosEventStoreTests
 {
     private readonly CosmosEventStore _sut;
-    private readonly CosmosEventStoreOptions _options = Substitute.For<CosmosEventStoreOptions>();
-    private readonly CosmosClient _client = Substitute.For<CosmosClient>();
+    private readonly CosmosEventStoreClient _client = Substitute.For<CosmosEventStoreClient>();
+    private readonly CosmosEventStoreOptions _options = new();
     private readonly Container _container = Substitute.For<Container>();
     private readonly Fixture _fixture = new Fixture();
 
     public CosmosEventStoreTests()
     {
-        _sut = new CosmosEventStore(null, _options);
+        _sut = new CosmosEventStore(_client, _options);
     }
 
     [Fact]
     public async Task GetEventStreamAsync_ShouldReturnNotNull_WhenCalled()
     {
-        _client.GetContainer(Arg.Any<string>(), Arg.Any<string>()).Returns(_container);
-        _options.CreateAndInitializeCosmosClientAsync().Returns(_client);
+        _client.GetContainerAsync().Returns(_container);
         var id = _fixture.Create<EventStreamId>();
 
         var result = await _sut.GetStreamAsync(id);
@@ -30,13 +29,12 @@ public class CosmosEventStoreTests
     [Fact]
     public async Task DisposeAsync_ShouldDispose_WhenClientIsCreated()
     {
-        _client.GetContainer(Arg.Any<string>(), Arg.Any<string>()).Returns(_container);
-        _options.CreateAndInitializeCosmosClientAsync().Returns(_client);
+        _client.GetContainerAsync().Returns(_container);
         var id = _fixture.Create<EventStreamId>();
 
         _ = await _sut.GetStreamAsync(id);
         await _sut.DisposeAsync();
 
-        _client.Received().Dispose();
+        await _client.Received().DisposeAsync();
     }
 }

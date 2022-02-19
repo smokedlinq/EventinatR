@@ -29,7 +29,7 @@ public static class ConfigureCosmosEventStore
 
                        configure(serviceProvider, options);
 
-                       return new CosmosEventStore(credential, options);
+                       return new CosmosEventStore(new CosmosEventStoreClient(credential, options), options);
                    });
 
         return builder;
