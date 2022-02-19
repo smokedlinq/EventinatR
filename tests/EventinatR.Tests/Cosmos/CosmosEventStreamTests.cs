@@ -34,16 +34,7 @@ public class CosmosEventStreamTests
     [Fact]
     public async Task GetVersionAsync_ShouldReturnVersion_WhenDocumentExist()
     {
-        var document = _fixture.Build<StreamDocument>()
-            .With(x => x.Version, new EventStreamVersion(1))
-            .Create();
-        var response = Substitute.For<ItemResponse<StreamDocument>>();
-
-        response.StatusCode.Returns(HttpStatusCode.OK);
-        response.Resource.Returns(document);
-
-        _container.ReadItemAsync<StreamDocument>(Arg.Any<string>(), Arg.Any<PartitionKey>())
-            .Returns(response);
+        SetupGetVersionAsync(1);
 
         var result = await _sut.GetVersionAsync();
 
@@ -88,5 +79,83 @@ public class CosmosEventStreamTests
 
         events.Should().NotBeEmpty();
         events.Count.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task AppendAsync_ShouldCallCreateItemOfEventDocument_WhenEventProvided()
+    {
+        var events = _fixture.CreateMany<object>();
+        var batch = Substitute.For<TransactionalBatch>();
+        var response = Substitute.For<TransactionalBatchResponse>();
+
+        SetupGetVersionAsync(EventStreamVersion.None);
+
+        response.IsSuccessStatusCode.Returns(true);
+
+        batch.ExecuteAsync().Returns(response);
+
+        _container.CreateTransactionalBatch(Arg.Any<PartitionKey>())
+            .Returns(batch);
+
+        var result = await _sut.AppendAsync(events);
+
+        batch.Received().CreateItem(Arg.Any<EventDocument>(), Arg.Any<TransactionalBatchItemRequestOptions>());
+    }
+
+    [Fact]
+    public async Task AppendAsync_ShouldCallUpsertItemOfStreamDocument_WhenEventProvided()
+    {
+        var events = _fixture.CreateMany<object>();
+        var batch = Substitute.For<TransactionalBatch>();
+        var response = Substitute.For<TransactionalBatchResponse>();
+
+        SetupGetVersionAsync(EventStreamVersion.None);
+
+        response.IsSuccessStatusCode.Returns(true);
+
+        batch.ExecuteAsync().Returns(response);
+
+        _container.CreateTransactionalBatch(Arg.Any<PartitionKey>())
+            .Returns(batch);
+
+        var result = await _sut.AppendAsync(events);
+
+        batch.Received().UpsertItem(Arg.Any<StreamDocument>(), Arg.Any<TransactionalBatchItemRequestOptions>());
+    }
+
+    [Fact]
+    public async Task AppendAsync_ShouldCallUpsertItemOfSnapshotDocument_WhenStateProvided()
+    {
+        var events = _fixture.CreateMany<object>();
+        var batch = Substitute.For<TransactionalBatch>();
+        var response = Substitute.For<TransactionalBatchResponse>();
+        var state = new object();
+
+        SetupGetVersionAsync(EventStreamVersion.None);
+
+        response.IsSuccessStatusCode.Returns(true);
+
+        batch.ExecuteAsync().Returns(response);
+
+        _container.CreateTransactionalBatch(Arg.Any<PartitionKey>())
+            .Returns(batch);
+
+        var result = await _sut.AppendAsync(events, state);
+
+        batch.Received().UpsertItem(Arg.Any<SnapshotDocument>(), Arg.Any<TransactionalBatchItemRequestOptions>());
+    }
+
+    private void SetupGetVersionAsync(EventStreamVersion version)
+    {
+        var document = _fixture.Build<StreamDocument>()
+            .With(x => x.Version, version)
+            .Create();
+        var response = Substitute.For<ItemResponse<StreamDocument>>();
+
+        response.StatusCode.Returns(HttpStatusCode.OK);
+        response.Resource.Returns(document);
+
+        _container.ReadItemAsync<StreamDocument>(Arg.Any<string>(), Arg.Any<PartitionKey>())
+            .Returns(response);
     }
 }
