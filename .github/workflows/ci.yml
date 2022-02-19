@@ -21,12 +21,15 @@ jobs:
     permissions:
       contents: read
 
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
     steps:
     - uses: actions/checkout@v2
 
     - uses: ./.github/actions/build
 
     - uses: codecov/codecov-action@v2
-      if: ${{ secrets.CODECOV_TOKEN }}
+      if: ${{ env.CODECOV_TOKEN }}
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
