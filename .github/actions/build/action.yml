@@ -18,3 +18,4 @@ runs:
     shell: pwsh
 
   - run: dotnet test --configuration Release --no-rebuild --logger GitHubActions /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+    shell: pwsh
