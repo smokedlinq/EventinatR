@@ -26,4 +26,17 @@ public class CosmosEventStoreTests
 
         result.Should().NotBeNull();
     }
+
+    [Fact]
+    public async Task DisposeAsync_ShouldDispose_WhenClientIsCreated()
+    {
+        _client.GetContainer(Arg.Any<string>(), Arg.Any<string>()).Returns(_container);
+        _options.CreateAndInitializeCosmosClientAsync().Returns(_client);
+        var id = _fixture.Create<EventStreamId>();
+
+        _ = await _sut.GetStreamAsync(id);
+        await _sut.DisposeAsync();
+
+        _client.Received().Dispose();
+    }
 }
