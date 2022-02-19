@@ -8,7 +8,7 @@ public class CosmosEventStoreTests
     private readonly CosmosEventStoreClient _client = Substitute.For<CosmosEventStoreClient>();
     private readonly CosmosEventStoreOptions _options = new();
     private readonly Container _container = Substitute.For<Container>();
-    private readonly Fixture _fixture = new Fixture();
+    private readonly Fixture _fixture = new();
 
     public CosmosEventStoreTests()
     {

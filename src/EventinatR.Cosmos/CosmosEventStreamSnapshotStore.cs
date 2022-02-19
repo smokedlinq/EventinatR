@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace EventinatR.Cosmos;
 
 internal class CosmosEventStreamSnapshotStore : EventStreamSnapshotStore
@@ -12,7 +6,7 @@ internal class CosmosEventStreamSnapshotStore : EventStreamSnapshotStore
     private readonly Container _container;
     private readonly PartitionKey _partitionKey;
     private readonly JsonSerializerOptions _serializerOptions;
-    
+
     public CosmosEventStreamSnapshotStore(EventStreamId streamId, Container container, PartitionKey partitionKey, JsonSerializerOptions serializerOptions)
     {
         _streamId = streamId ?? throw new ArgumentNullException(nameof(streamId));

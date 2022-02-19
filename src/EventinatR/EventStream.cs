@@ -46,7 +46,7 @@ public abstract class EventStream
             }
 
             var context = CreateTransactionContext(version, events);
-            
+
             await AppendAsync<TState>(context, state, cancellationToken).ConfigureAwait(false);
 
             return new EventStreamVersion(version.Value);

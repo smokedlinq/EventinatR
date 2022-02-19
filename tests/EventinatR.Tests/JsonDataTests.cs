@@ -22,7 +22,7 @@ public class JsonDataTests
         var data = JsonData.From(value);
 
         data.Type.Assembly.Should().Be(value.GetType().Assembly.GetName().FullName);
-        data.Value.ToString().Should().Be(@"{""value"":1}");
+        data.Value.ToString().Should().Be(/*lang=json,strict*/ @"{""value"":1}");
     }
 
     [Fact]

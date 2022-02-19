@@ -6,7 +6,7 @@ internal class CosmosEventStreamReader
 {
     private readonly Container _container;
     private readonly PartitionKey _partitionKey;
-    
+
     public CosmosEventStreamReader(Container container, PartitionKey partitionKey, EventStreamVersion? version = null)
     {
         _container = container ?? throw new ArgumentNullException(nameof(container));

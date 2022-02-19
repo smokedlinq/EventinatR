@@ -1,4 +1,3 @@
-using Azure.Core;
 using Microsoft.Extensions.Options;
 
 namespace EventinatR.Cosmos;

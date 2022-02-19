@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using EventinatR.Cosmos;
 using EventinatR.Cosmos.Documents;
 using Microsoft.Azure.Cosmos;
@@ -13,7 +8,7 @@ public class CosmosEventStreamTests
 {
     private readonly CosmosEventStream _sut;
     private readonly Container _container = Substitute.For<Container>();
-    private readonly Fixture _fixture = new Fixture();
+    private readonly Fixture _fixture = new();
 
     public CosmosEventStreamTests()
     {
@@ -97,7 +92,7 @@ public class CosmosEventStreamTests
         _container.CreateTransactionalBatch(Arg.Any<PartitionKey>())
             .Returns(batch);
 
-        var result = await _sut.AppendAsync(events);
+        await _sut.AppendAsync(events);
 
         batch.Received().CreateItem(Arg.Any<EventDocument>(), Arg.Any<TransactionalBatchItemRequestOptions>());
     }
@@ -118,7 +113,7 @@ public class CosmosEventStreamTests
         _container.CreateTransactionalBatch(Arg.Any<PartitionKey>())
             .Returns(batch);
 
-        var result = await _sut.AppendAsync(events);
+        await _sut.AppendAsync(events);
 
         batch.Received().UpsertItem(Arg.Any<StreamDocument>(), Arg.Any<TransactionalBatchItemRequestOptions>());
     }
@@ -140,7 +135,7 @@ public class CosmosEventStreamTests
         _container.CreateTransactionalBatch(Arg.Any<PartitionKey>())
             .Returns(batch);
 
-        var result = await _sut.AppendAsync(events, state);
+        await _sut.AppendAsync(events, state);
 
         batch.Received().UpsertItem(Arg.Any<SnapshotDocument>(), Arg.Any<TransactionalBatchItemRequestOptions>());
     }

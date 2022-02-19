@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace EventinatR.Cosmos;
 
 internal class CosmosEventStream : EventStream
@@ -42,7 +40,7 @@ internal class CosmosEventStream : EventStream
         var eTag = (context.CurrentVersion as CosmosEventStreamVersion)?.ETag;
 
         var batch = _container.CreateTransactionalBatch(_partitionKey);
-        
+
         var options = new TransactionalBatchItemRequestOptions
         {
             EnableContentResponseOnWrite = false

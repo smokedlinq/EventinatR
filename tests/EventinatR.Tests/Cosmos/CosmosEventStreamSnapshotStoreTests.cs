@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using EventinatR.Cosmos;
 using EventinatR.Cosmos.Documents;
 using Microsoft.Azure.Cosmos;

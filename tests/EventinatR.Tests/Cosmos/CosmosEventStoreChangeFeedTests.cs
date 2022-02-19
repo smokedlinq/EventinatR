@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EventinatR.Cosmos;
 
 namespace EventinatR.Tests.Cosmos;
@@ -12,7 +7,7 @@ public class CosmosEventStoreChangeFeedTests
     [Fact]
     public void ParseEvents_ShouldReturnEvents_WhenChangeFeedJsonHasEventDocument()
     {
-        var json = @"[
+        var json = /*lang=json,strict*/ @"[
             {
                 ""type"": ""event"",
                 ""stream"": ""stream"",
@@ -34,7 +29,7 @@ public class CosmosEventStoreChangeFeedTests
     [Fact]
     public void ParseEvents_ShouldReturnNoEvents_WhenChangeFeedJsonHasStreamDocument()
     {
-        var json = @"[
+        var json = /*lang=json,strict*/ @"[
             {
                 ""type"": ""stream"",
                 ""stream"": ""stream"",
@@ -50,7 +45,7 @@ public class CosmosEventStoreChangeFeedTests
     [Fact]
     public void ParseEvents_ShouldReturnOnlyEvent_WhenChangeFeedJsonHasMultipleDocumentTypes()
     {
-        var json = @"[
+        var json = /*lang=json,strict*/ @"[
             {
                 ""type"": ""stream"",
                 ""stream"": ""stream"",

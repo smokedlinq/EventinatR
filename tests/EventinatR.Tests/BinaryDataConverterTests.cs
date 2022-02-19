@@ -8,7 +8,7 @@ public class BinaryDataConverterTests
     [Fact]
     public void CanConvertFromJsonToObject()
     {
-        var json = @"{""Data"":{""StringProperty"":""string"",""Int32Property"":5,""BooleanProperty"":true,""DoubleProperty"":9.95}}";
+        var json = /*lang=json,strict*/ @"{""Data"":{""StringProperty"":""string"",""Int32Property"":5,""BooleanProperty"":true,""DoubleProperty"":9.95}}";
         var data = JsonSerializer.Deserialize<TestData>(json);
         var obj = data?.Data.ToObjectFromJson<TestObject>();
 
@@ -26,7 +26,7 @@ public class BinaryDataConverterTests
         var data = new TestData(BinaryData.FromObjectAsJson(obj));
         var json = JsonSerializer.Serialize(data);
 
-        json.Should().Be(@"{""Data"":{""StringProperty"":""string"",""Int32Property"":5,""BooleanProperty"":true,""DoubleProperty"":9.95}}");
+        json.Should().Be(/*lang=json,strict*/ @"{""Data"":{""StringProperty"":""string"",""Int32Property"":5,""BooleanProperty"":true,""DoubleProperty"":9.95}}");
     }
 
     private record TestData([property: JsonConverter(typeof(BinaryDataConverter))] BinaryData Data);

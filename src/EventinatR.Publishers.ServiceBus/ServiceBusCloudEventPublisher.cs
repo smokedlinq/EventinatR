@@ -26,7 +26,7 @@ public class ServiceBusCloudEventPublisher : ServiceBusEventPublisher
     }
 
     protected virtual CloudEvent ConvertToCloudEvent(Event e)
-    { 
+    {
         var cloudEvent = new CloudEvent(_source, e.Data.Type.Name, e.Data.Value, MediaTypeNames.Application.Json, CloudEventDataFormat.Json)
         {
             Subject = e.StreamId.Value,

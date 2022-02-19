@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-
 namespace EventinatR.InMemory;
 
 internal class InMemoryEventStream : EventStream, IDisposable
