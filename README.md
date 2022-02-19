@@ -6,6 +6,8 @@
 [![NuGet](https://img.shields.io/nuget/dt/EventinatR.svg)](https://www.nuget.org/packages/EventinatR)
 [![NuGet](https://img.shields.io/nuget/vpre/EventinatR.svg)](https://www.nuget.org/packages/EventinatR)
 
+[![codecov](https://codecov.io/gh/smokedlinq/EventinatR/branch/main/graph/badge.svg?token=70XPK72LMQ)](https://codecov.io/gh/smokedlinq/EventinatR)
+
 A simple Azure event sourcing pattern implementation.
 
 ## Getting started
