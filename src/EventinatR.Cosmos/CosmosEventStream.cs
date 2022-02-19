@@ -4,20 +4,21 @@ namespace EventinatR.Cosmos;
 
 internal class CosmosEventStream : EventStream
 {
+    private readonly Container _container;
+    private readonly PartitionKey _partitionKey;
+    private readonly JsonSerializerOptions _serializerOptions;
+    private readonly CosmosEventStreamReader _reader;
     private readonly CosmosEventStreamSnapshotStore _snapshots;
 
     public CosmosEventStream(Container container, PartitionKey partitionKey, EventStreamId id, JsonSerializerOptions serializerOptions)
         : base(id)
     {
-        Container = container ?? throw new ArgumentNullException(nameof(container));
-        PartitionKey = partitionKey;
-        SerializerOptions = serializerOptions ?? throw new ArgumentNullException(nameof(serializerOptions));
-        _snapshots = new CosmosEventStreamSnapshotStore(this);
+        _container = container ?? throw new ArgumentNullException(nameof(container));
+        _partitionKey = partitionKey;
+        _serializerOptions = serializerOptions ?? throw new ArgumentNullException(nameof(serializerOptions));
+        _reader = new CosmosEventStreamReader(_container, _partitionKey);
+        _snapshots = new CosmosEventStreamSnapshotStore(Id, _container, _partitionKey, _serializerOptions);
     }
-
-    internal Container Container { get; }
-    internal PartitionKey PartitionKey { get; }
-    internal JsonSerializerOptions SerializerOptions { get; }
 
     public override EventStreamSnapshotStore Snapshots => _snapshots;
 
@@ -34,13 +35,13 @@ internal class CosmosEventStream : EventStream
     }
 
     public override IAsyncEnumerable<Event> ReadAsync(CancellationToken cancellationToken = default)
-        => ReadFromVersionAsync(default, cancellationToken);
+        => _reader.ReadAsync(cancellationToken);
 
     protected override async Task AppendAsync<TState>(TransactionContext context, TState state, CancellationToken cancellationToken = default)
     {
         var eTag = (context.CurrentVersion as CosmosEventStreamVersion)?.ETag;
 
-        var batch = Container.CreateTransactionalBatch(PartitionKey);
+        var batch = _container.CreateTransactionalBatch(_partitionKey);
         
         var options = new TransactionalBatchItemRequestOptions
         {
@@ -82,35 +83,11 @@ internal class CosmosEventStream : EventStream
         }
     }
 
-    internal async IAsyncEnumerable<Event> ReadFromVersionAsync(long version, [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        var query = new QueryDefinition("SELECT * FROM c WHERE c.type = @type AND c.version > @version ORDER BY c.version")
-            .WithParameter("@type", DocumentTypes.Event)
-            .WithParameter("@version", version);
-
-        var options = new QueryRequestOptions
-        {
-            PartitionKey = PartitionKey
-        };
-
-        var iterator = Container.GetItemQueryIterator<EventDocument>(query, null, options);
-
-        while (iterator.HasMoreResults)
-        {
-            var page = await iterator.ReadNextAsync(cancellationToken).ConfigureAwait(false);
-
-            foreach (var doc in page)
-            {
-                yield return doc.ToEvent();
-            }
-        }
-    }
-
     private async Task<ItemResponse<StreamDocument>?> GetCosmosEventStreamResourceAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            return await Container.ReadItemAsync<StreamDocument>(Id.Value, PartitionKey, cancellationToken: cancellationToken);
+            return await _container.ReadItemAsync<StreamDocument>(Id.Value, _partitionKey, cancellationToken: cancellationToken);
         }
         catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {

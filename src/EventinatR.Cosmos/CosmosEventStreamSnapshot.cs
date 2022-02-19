@@ -2,14 +2,14 @@ namespace EventinatR.Cosmos;
 
 internal class CosmosEventStreamSnapshot<T> : EventStreamSnapshot<T>
 {
-    private readonly CosmosEventStream _stream;
+    private readonly CosmosEventStreamReader _reader;
 
-    public CosmosEventStreamSnapshot(CosmosEventStream stream, EventStreamVersion? version = null, T? state = default)
-        : base(stream?.Id ?? throw new ArgumentNullException(nameof(stream)), version, state)
-        => _stream = stream;
+    public CosmosEventStreamSnapshot(EventStreamId streamId, CosmosEventStreamReader reader, T? state = default)
+        : base(streamId ?? throw new ArgumentNullException(nameof(streamId)), reader.Version, state)
+        => _reader = reader ?? throw new ArgumentNullException(nameof(reader));
 
     public override IAsyncEnumerable<Event> ReadAsync(CancellationToken cancellationToken = default)
-        => _stream.ReadFromVersionAsync(Version.Value, cancellationToken);
+        => _reader.ReadAsync(cancellationToken);
 
     internal static EventStreamId CreateSnapshotId(EventStreamId streamId)
         => streamId + EventStreamId.ConvertTo<T>();

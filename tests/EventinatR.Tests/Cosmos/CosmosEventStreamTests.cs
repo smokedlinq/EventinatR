@@ -13,7 +13,7 @@ public class CosmosEventStreamTests
 {
     private readonly CosmosEventStream _sut;
     private readonly Container _container = Substitute.For<Container>();
-    //private readonly Fixture _fixture = new Fixture();
+    private readonly Fixture _fixture = new Fixture();
 
     public CosmosEventStreamTests()
     {
@@ -34,7 +34,9 @@ public class CosmosEventStreamTests
     [Fact]
     public async Task GetVersionAsync_ShouldReturnVersion_WhenDocumentExist()
     {
-        var document = new StreamDocument("stream", "id", 1);
+        var document = _fixture.Build<StreamDocument>()
+            .With(x => x.Version, new EventStreamVersion(1))
+            .Create();
         var response = Substitute.For<ItemResponse<StreamDocument>>();
 
         response.StatusCode.Returns(HttpStatusCode.OK);
@@ -46,5 +48,45 @@ public class CosmosEventStreamTests
         var result = await _sut.GetVersionAsync();
 
         result.Value.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task ReadAsync_ShouldBeAnEmptyList_WhenStreamDoesNotExist()
+    {
+        var iterator = Substitute.For<FeedIterator<EventDocument>>();
+        var response = Substitute.For<FeedResponse<EventDocument>>();
+
+        response.GetEnumerator().Returns(Array.Empty<EventDocument>().AsEnumerable().GetEnumerator());
+
+        iterator.HasMoreResults.Returns(true, false);
+        iterator.ReadNextAsync().Returns(response);
+
+        _container.GetItemQueryIterator<EventDocument>(Arg.Any<QueryDefinition>(), Arg.Any<string>(), Arg.Any<QueryRequestOptions>())
+            .Returns(iterator);
+
+        var events = await _sut.ReadAsync().ToListAsync();
+
+        events.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task ReadAsync_ShouldBeContainAnEvent_WhenStreamExists()
+    {
+        var iterator = Substitute.For<FeedIterator<EventDocument>>();
+        var response = Substitute.For<FeedResponse<EventDocument>>();
+        var document = _fixture.Create<EventDocument>();
+
+        response.GetEnumerator().Returns(new[] { document }.AsEnumerable().GetEnumerator());
+
+        iterator.HasMoreResults.Returns(true, false);
+        iterator.ReadNextAsync().Returns(response);
+
+        _container.GetItemQueryIterator<EventDocument>(Arg.Any<QueryDefinition>(), Arg.Any<string>(), Arg.Any<QueryRequestOptions>())
+            .Returns(iterator);
+
+        var events = await _sut.ReadAsync().ToListAsync();
+
+        events.Should().NotBeEmpty();
+        events.Count.Should().Be(1);
     }
 }
