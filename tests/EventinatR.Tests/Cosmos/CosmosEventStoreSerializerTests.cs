@@ -71,4 +71,78 @@ public class CosmosEventStoreSerializerTests
         json["state"]?["type"]?["assembly"]?.GetValue<string>().Should().NotBeEmpty();
         json["state"]?["value"]?.Should().NotBeNull();
     }
+
+    [Fact]
+    public void FromStream_ShouldReturnEvent_WhenJsonIsEventDocument()
+    {
+        var json = /*lang=json,strict*/ @"{
+            ""type"": ""event"",
+            ""stream"": ""stream"",
+            ""id"": ""id"",
+            ""version"": 1,
+            ""transaction"": { ""version"": 1, ""count"": 1 },
+            ""timestamp"": ""2021-02-18T21:50:00.000Z"",
+            ""data"": {
+                ""type"": { ""name"": ""System.Object"", ""assembly"": ""System.Private.CoreLib"" },
+                ""value"": { }
+            }
+        }";
+        var stream = BinaryData.FromString(json).ToStream();
+
+        var document = _sut.FromStream<EventDocument>(stream);
+
+        document.Type.Should().Be(DocumentTypes.Event);
+        document.Stream.Value.Should().Be("stream");
+        document.Id.Value.Should().Be("id");
+        document.Version.Value.Should().Be(1);
+        document.Timestamp.Should().Be(new DateTimeOffset(2021, 2, 18, 21, 50, 0, TimeSpan.Zero));
+        document.Data.Type.Name.Should().Be("System.Object");
+        document.Data.Type.Assembly.Should().Be("System.Private.CoreLib");
+        document.Data.Value.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void FromStream_ShouldReturnStream_WhenJsonIsStreamDocument()
+    {
+        var json = /*lang=json,strict*/ @"{
+            ""type"": ""stream"",
+            ""stream"": ""stream"",
+            ""id"": ""id"",
+            ""version"": 1
+        }";
+        var stream = BinaryData.FromString(json).ToStream();
+
+        var document = _sut.FromStream<StreamDocument>(stream);
+
+        document.Type.Should().Be(DocumentTypes.Stream);
+        document.Stream.Value.Should().Be("stream");
+        document.Id.Value.Should().Be("id");
+        document.Version.Value.Should().Be(1);
+    }
+
+    [Fact]
+    public void FromStream_ShouldReturnSnapshot_WhenJsonIsSnapshotDocument()
+    {
+        var json = /*lang=json,strict*/ @"{
+            ""type"": ""snapshot"",
+            ""stream"": ""stream"",
+            ""id"": ""id"",
+            ""version"": 1,
+            ""state"": {
+                ""type"": { ""name"": ""System.Object"", ""assembly"": ""System.Private.CoreLib"" },
+                ""value"": { }
+            }
+        }";
+        var stream = BinaryData.FromString(json).ToStream();
+
+        var document = _sut.FromStream<SnapshotDocument>(stream);
+
+        document.Type.Should().Be(DocumentTypes.Snapshot);
+        document.Stream.Value.Should().Be("stream");
+        document.Id.Value.Should().Be("id");
+        document.Version.Value.Should().Be(1);
+        document.State.Type.Name.Should().Be("System.Object");
+        document.State.Type.Assembly.Should().Be("System.Private.CoreLib");
+        document.State.Value.Should().NotBeNull();
+    }
 }
