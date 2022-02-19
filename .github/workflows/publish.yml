@@ -2,12 +2,8 @@ name: Publish
 
 on:
   push:
-    tags: 
+    tags:
     - 'v*'
-
-permissions:
-  contents: write
-  packages: write
 
 concurrency:
   group: ${{ github.ref }}
@@ -21,6 +17,10 @@ jobs:
   publish:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      packages: write
+
     steps:
     - uses: actions/checkout@v2
 
@@ -30,7 +30,7 @@ jobs:
 
     - run: ./.github/workflows/scripts/Set-VersionVariables.ps1
       shell: pwsh
-      
+
     - run: dotnet pack --configuration Release -p:Version=$PACKAGE_VERSION --output ./publish
 
     - run: dotnet nuget push "*.nupkg" -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate

@@ -6,7 +6,7 @@
 [![NuGet](https://img.shields.io/nuget/dt/EventinatR.svg)](https://www.nuget.org/packages/EventinatR)
 [![NuGet](https://img.shields.io/nuget/vpre/EventinatR.svg)](https://www.nuget.org/packages/EventinatR)
 
-Simple event sourcing implementation for .NET applications.
+A simple Azure event sourcing pattern implementation.
 
 ## Getting started
 

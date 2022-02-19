@@ -2,23 +2,13 @@ name: Continuous Integration
 
 on:
   push:
-    branches:
-    - main
+    branches: [ main ]
   pull_request:
-    branches:
-    - main
-
-permissions:
-  contents: read
-  security-events: write
+    branches: [ main ]
 
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
-
-defaults:
-  run:
-    shell: pwsh
 
 env:
   DOTNET_NOLOGO: true
@@ -28,23 +18,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+
     steps:
     - uses: actions/checkout@v2
 
     - uses: ./.github/actions/build
-
-    - uses: snyk/actions/dotnet@master
-      continue-on-error: true
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: >-
-          --all-projects
-          --detection-depth=8
-          --severity-threshold=high
-          --sarif-file-output=snyk.sarif
-        command: test
-
-    - uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: snyk.sarif

@@ -18,7 +18,7 @@ public class EventStreamVersionTests
     [Fact]
     public void ImplicitCastFromInt32()
     {
-        EventStreamVersion sut = 2;
+        EventStreamVersion sut = 1;
         sut.Value.Should().Be(1);
     }
 
