@@ -13,8 +13,8 @@ internal class InMemoryEventStreamSnapshotStore : EventStreamSnapshotStore
     public override Task<EventStreamSnapshot<T>> GetAsync<T>(CancellationToken cancellationToken = default)
     {
         var type = typeof(T);
-        var snapshot = _snapshots.ContainsKey(type)
-            ? (EventStreamSnapshot<T>)_snapshots[type]
+        var snapshot = _snapshots.TryGetValue(type, out var value)
+            ? (EventStreamSnapshot<T>)value
             : new InMemoryEventStreamSnapshot<T>(_stream);
 
         return Task.FromResult(snapshot);

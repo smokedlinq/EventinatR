@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ExRam.Gremlinq.Core" Version="9.2.0" />
-    <PackageReference Include="ExRam.Gremlinq.Providers.CosmosDb" Version="9.2.0" />
+    <PackageReference Include="ExRam.Gremlinq.Core" Version="10.0.0" />
+    <PackageReference Include="ExRam.Gremlinq.Providers.CosmosDb" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
   </ItemGroup>
 </Project>

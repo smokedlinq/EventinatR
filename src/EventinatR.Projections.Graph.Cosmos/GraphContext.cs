@@ -63,4 +63,19 @@ public abstract class GraphContext : IStartGremlinQuery
 
     public virtual IEdgeGremlinQuery<object> E(params object[] ids)
         => Source.E(ids);
+
+    public IGremlinQueryAdmin AsAdmin()
+        => Source.AsAdmin();
+
+    public IEdgeGremlinQuery<object> E(object id)
+        => Source.E(id);
+
+    public IEdgeGremlinQuery<TEdge> E<TEdge>(object id)
+        => Source.E<TEdge>(id);
+
+    public IVertexGremlinQuery<object> V(object id)
+        => Source.V(id);
+
+    public IVertexGremlinQuery<TVertex> V<TVertex>(object id)
+        => Source.V<TVertex>(id);
 }
