@@ -10,10 +10,10 @@
     <IsPackable>true</IsPackable>
     <DebugType>Portable</DebugType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>https://github.com/smokedlinq/EventinatR</Authors>
-    <Company>https://github.com/smokedlinq/EventinatR</Company>
-    <PackageProjectUrl>https://github.com/smokedlinq/EventinatR</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/smokedlinq/EventinatR.git</RepositoryUrl>
+    <Authors>https://github.com/EventinatR/EventinatR</Authors>
+    <Company>https://github.com/EventinatR/EventinatR</Company>
+    <PackageProjectUrl>https://github.com/EventinatR/EventinatR</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/EventinatR/EventinatR.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <IncludeSymbols>true</IncludeSymbols>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>

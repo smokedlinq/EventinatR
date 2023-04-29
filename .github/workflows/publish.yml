@@ -26,7 +26,7 @@ jobs:
 
     - uses: ./.github/actions/build
 
-    - uses: smokedlinq/powershell-devops@v0
+    - uses: powershell-devops/powershell-devops@v0
 
     - run: ./.github/workflows/scripts/Set-VersionVariables.ps1
       shell: pwsh
